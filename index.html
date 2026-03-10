@@ -735,8 +735,23 @@ function showTab(tab) {
             loadNetWorthChart();
             loadCategoryChart();
             renderRecurring();
-            // Use loadData to properly update all values including loan
-            loadData();
+            // Update loan values for stats view
+            var loan = JSON.parse(localStorage.getItem('loan') || '{"amount":0,"btc":0}');
+            var rt = exchangeRate[currency];
+            var sm = currency === 'USD' ? '$' : 'BND ';
+            if (loan.btc > 0 && btcPrice > 0) {
+                var cv = loan.btc * btcPrice * toUsdRate * rt;
+                var ltv = cv > 0 ? (loan.amount / cv) * 100 : 0;
+                document.getElementById('loanBtcDisplayStats').innerHTML = '₿ ' + loan.btc.toFixed(4);
+                document.getElementById('loanCollateralValueStats').textContent = sm + cv.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                document.getElementById('loanAmountStats').textContent = '-' + sm + (loan.amount * rt).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                document.getElementById('ltvDisplayStats').textContent = ltv.toFixed(1) + '%';
+            } else if (loan.btc > 0) {
+                // If btcPrice is 0, show the BTC amount at least
+                document.getElementById('loanBtcDisplayStats').innerHTML = '₿ ' + loan.btc.toFixed(4);
+                document.getElementById('loanCollateralValueStats').textContent = 'Loading...';
+                document.getElementById('loanAmountStats').textContent = '-' + sm + (loan.amount * rt).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            }
         }, 100);
     }
 }
