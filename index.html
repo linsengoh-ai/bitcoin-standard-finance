@@ -370,7 +370,8 @@ function renderTxs(txs) {
         lastDate = txDate;
         
         var idx = txs.length - 1 - sorted.length + i + 1;
-        html += '<div class="tx" data-idx="' + idx + '" ontouchstart="touchStart(event, this)" ontouchend="touchEnd(event, this)" ontouchmove="touchMove(event, this)"><div class="txic" style="background:' + (x.type === 'income' ? 'rgba(48,209,88,0.15)' : 'rgba(255,69,58,0.15)') + '">' + ci[x.category] + '</div><div class="txd"><div class="txdn">' + (x.desc || cn[x.category]) + '</div><div class="txm">' + txDate + '</div></div><div class="txa ' + (x.type === 'income' ? 'p' : 'n') + '">' + (x.type === 'income' ? '+' : '-') + '$' + x.amount.toFixed(2) + '</div><div class="tx-actions"><button onclick="editTx(' + idx + ')">Edit</button><button onclick="deleteTx(' + idx + ')" style="background:var(--red)">Delete</button></div></div>';
+        var sourceLabel = x.source === 'bank' ? '<span style="color:#0a84ff;font-size:10px;margin-left:4px">🏦</span>' : (x.source === 'cash' ? '<span style="color:#30d158;font-size:10px;margin-left:4px">💵</span>' : '');
+        html += '<div class="tx" data-idx="' + idx + '" ontouchstart="touchStart(event, this)" ontouchend="touchEnd(event, this)" ontouchmove="touchMove(event, this)"><div class="txic" style="background:' + (x.type === 'income' ? 'rgba(48,209,88,0.15)' : 'rgba(255,69,58,0.15)') + '">' + ci[x.category] + '</div><div class="txd"><div class="txdn">' + (x.desc || cn[x.category]) + sourceLabel + '</div><div class="txm">' + txDate + '</div></div><div class="txa ' + (x.type === 'income' ? 'p' : 'n') + '">' + (x.type === 'income' ? '+' : '-') + '$' + x.amount.toFixed(2) + '</div><div class="tx-actions"><button onclick="editTx(' + idx + ')">Edit</button><button onclick="deleteTx(' + idx + ')" style="background:var(--red)">Delete</button></div></div>';
     });
     
     l.innerHTML = html;
