@@ -171,9 +171,16 @@ var cn = {food:'Food',transport:'Transport',utilities:'Utilities',entertainment:
 document.getElementById('cdate').textContent = new Date().toLocaleDateString('en-US', {weekday:'short', month:'short', day:'numeric'});
 
 function init() {
+    // Load cached price first
+    var cached = JSON.parse(localStorage.getItem('btcPriceCache') || '{}');
+    if (cached.price) {
+        btcPrice = cached.price;
+    }
     loadData();
     fetchExchangeRate();
     fetchBTCPrice();
+    // Refresh data after short delay to ensure price is loaded
+    setTimeout(function() { loadData(); }, 1500);
 }
 
 function fetchExchangeRate() {
