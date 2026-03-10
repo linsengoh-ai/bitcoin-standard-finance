@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Finance</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0a0a0c;--card:#16161a;--inp:#222228;--text:#f5f5f7;--ts:#86868b;--acc:#f5a623;--grn:#34c759;--red:#ff3b30;--border:#2c2c30}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','SF Pro Text',sans-serif;padding:60px 16px 100px;min-height:100vh;-webkit-font-smoothing:antialiased}
+.hdr{position:fixed;top:0;left:0;right:0;padding:16px 20px;background:rgba(10,10,12,0.85);backdrop-filter:blur(30px);-webkit-backdrop-filter:blur(30px);z-index:100;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border)}
+.hdr h1{font-size:20px;font-weight:600;letter-spacing:-0.02em}
+.cnt{padding:70px 0 120px;max-width:520px;margin:0 auto}
+.nwc{background:linear-gradient(145deg,#1c1c22,#121216);border:1px solid var(--border);border-radius:24px;padding:28px 24px;margin-bottom:16px;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,0.4),inset 0 1px 0 rgba(255,255,255,0.05)}
+.nwl{color:var(--ts);font-size:12px;font-weight:500;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px}
+.nwa{font-size:38px;font-weight:700;cursor:pointer;letter-spacing:-0.02em;background:linear-gradient(135deg,#fff 0%,#ccc 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.sr{display:flex;gap:10px;margin-bottom:20px}
+.sc{flex:1;background:var(--card);border:1px solid var(--border);border-radius:18px;padding:18px 14px;text-align:center}
+.sl{color:var(--ts);font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px}
+.sv{font-size:20px;font-weight:600}
+.sv.g{color:var(--grn)}
+.sv.r{color:var(--red)}
+.st{font-size:13px;color:var(--ts);text-transform:uppercase;letter-spacing:0.1em;font-weight:600;margin:24px 20px 12px}
+.ri{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;background:var(--card);border:1px solid var(--border);border-radius:16px;margin-bottom:8px;cursor:pointer;transition:all 0.2s ease}
+.ri:active{transform:scale(0.98);opacity:0.9}
+.ri>div:first-child{display:flex;align-items:center;gap:14px}
+.ri .lbl{color:var(--text);font-size:15px;font-weight:500}
+.ri .val{font-weight:600;color:var(--text);font-size:16px}
+.ri .sub{font-size:12px;color:var(--ts);text-align:right;min-width:80px}
+.fab{position:fixed;bottom:28px;right:24px;width:56px;height:56px;border-radius:28px;background:linear-gradient(135deg,#f5a623,#ff7c00);color:#000;font-size:26px;border:none;display:flex;align-items:center;justify-content:center;z-index:90;box-shadow:0 8px 24px rgba(245,166,35,0.4)}
+.mod{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:200;display:none;align-items:flex-end;justify-content:center;-webkit-backdrop-filter:blur(10px)}
+.mod.act{display:flex}
+.modc{background:var(--card);width:100%;max-width:520px;border-radius:28px 28px 0 0;padding:28px 24px;animation:slideUp 0.3s ease}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modh{display:flex;justify-content:space-between;align-items:center;margin-bottom:28px}
+.modt{font-size:24px;font-weight:600}
+.modx{width:32px;height:32px;border-radius:16px;background:var(--inp);border:none;color:var(--text);font-size:16px;cursor:pointer}
+.fg{margin-bottom:22px}
+.fg label{display:block;color:var(--ts);font-size:13px;font-weight:500;margin-bottom:10px}
+.fg input,.fg select{width:100%;padding:16px 18px;background:var(--inp);border:1px solid var(--border);border-radius:14px;color:var(--text);font-size:16px}
+.fg select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2386868b' d='M6 8L1 3h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 16px center}
+.tt{display:flex;background:var(--inp);border-radius:14px;padding:4px;margin-bottom:24px}
+.tt button{flex:1;padding:14px;border:none;border-radius:12px;font-size:15px;font-weight:600;cursor:pointer;background:0 0;color:var(--ts);transition:all 0.2s}
+.tt button.act{background:var(--text);color:var(--bg)}
+.sb{width:100%;padding:18px;background:linear-gradient(135deg,#f5a623,#ff7c00);color:#000;border:none;border-radius:16px;font-size:17px;font-weight:600;cursor:pointer;box-shadow:0 4px 16px rgba(245,166,35,0.3)}
+.Tl{margin-bottom:100px}
+.tx{display:flex;align-items:center;padding:16px 18px;background:var(--card);border:1px solid var(--border);border-radius:16px;margin-bottom:8px}
+.txic{width:44px;height:44px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:20px;margin-right:14px;background:var(--inp)}
+.txd{flex:1}
+.txdn{font-size:15px;font-weight:500;margin-bottom:2px}
+.txm{font-size:12px;color:var(--ts)}
+.txa{font-size:16px;font-weight:600}
+.txa.p{color:var(--grn)}
+.tx{position:relative;overflow:hidden}
+.tx-actions{position:absolute;right:0;top:0;bottom:0;display:flex;transform:translateX(100%);transition:transform 0.25s ease}
+.tx.swiped .tx-actions{transform:translateX(0)}
+.tx-actions button{padding:0 24px;border:none;color:#fff;font-size:14px;font-weight:600;cursor:pointer}
+.tx-actions button:first-child{background:#007aff}
+.txa.n{color:var(--red)}
+.qa{display:flex;gap:8px;margin-bottom:20px;overflow-x:auto;padding:4px 2px;scrollbar-width:none;-ms-overflow-style:none}
+.qa::-webkit-scrollbar{display:none}
+.qb{padding:12px 18px;background:var(--card);border:1px solid var(--border);border-radius:22px;color:var(--text);font-size:14px;font-weight:500;white-space:nowrap;cursor:grab;user-select:none;-webkit-user-select:none;transition:all 0.2s}
+.qb:active{transform:scale(0.96)}
+.qb.dragging{opacity:0.6;cursor:grabbing;box-shadow:0 8px 24px rgba(0,0,0,0.4)}
+.tb{position:fixed;bottom:0;left:0;right:0;display:flex;background:rgba(22,22,26,0.95);z-index:100;border-top:1px solid var(--border);padding-bottom:env(safe-area-inset-bottom,20px)}
+.ti{flex:1;padding:14px;text-align:center;color:var(--ts);font-size:11px;cursor:pointer;font-weight:500}
+.ti.act{color:#fff}
+.ti span{display:block;font-size:24px;margin-bottom:4px}
+.ti.act span{opacity:1}
+.hd{display:none}
+</style>
+</head>
+<body>
+<div class="hdr"><div><h1>Finance</h1><span id="cdate"></span></div><div style="display:flex;align-items:center;gap:8px"><button onclick="exportData()" style="background:none;border:none;color:var(--ts);font-size:12px;cursor:pointer">💾</button><input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(this.files[0])"><button onclick="document.getElementById('importFile').click()" style="background:none;border:none;color:var(--ts);font-size:12px;cursor:pointer">📂</button><span>₿ <span id="btcPrice">$0</span></span></div></div>
+<div class="cnt" id="financeView">
+<div class="nwc"><div class="nwl">Net Worth</div><div class="nwa" id="totalNetWorth" onclick="toggleCurrency()">$0</div><div id="btcDailyChange"></div></div>
+<div class="st">Assets</div>
+<div class="ri" onclick="openBTCModal()"><div><span>🔐</span><span class="lbl">Ledger</span></div><div style="text-align:right"><div class="val" id="ledgerBtcDisplay">₿ 0.00</div><div class="sub" id="ledgerValueDisplay">BND 0</div></div></div>
+<div class="ri" onclick="openCashModal()"><div><span>💵</span><span class="lbl">Cash Balance</span></div><div style="text-align:right"><div class="val" style="color:var(--grn)" id="cashDisplay">BND 0</div></div></div>
+<div class="ri" onclick="openBankModal()"><div><span>🏦</span><span class="lbl">Bank Balance</span></div><div style="text-align:right"><div class="val" style="color:var(--grn)" id="bankDisplay">BND 0</div></div></div>
+<div class="ri" onclick="openLoanModal()"><div><span>⛓️</span><span class="lbl">Ledn Collateral</span></div><div style="text-align:right"><div class="val" id="loanBtcDisplay">₿ 0.00</div><div class="sub" id="ltvQuickDisplay">LTV 0%</div></div></div>
+<div class="ri" onclick="openTransferModal()"><div><span>🔄</span><span class="lbl">Transfer</span></div><div style="text-align:right"><div class="val" style="color:var(--ts)">Move money</div></div></div>
+<div class="st">Liabilities</div>
+<div class="ri" onclick="openLoanModal()"><div><span>💸</span><span class="lbl">Ledn Loan</span></div><div style="text-align:right"><div class="val" style="color:var(--red)" id="loanQuickDisplay">-BND 0</div></div></div>
+<div class="sr"><div class="sc"><div class="sl">Income</div><div class="sv g" id="monthlyIncome">$0</div></div><div class="sc"><div class="sl">Expenses</div><div class="sv r" id="monthlyExpenses">$0</div></div><div class="sc"><div class="sl">Net</div><div class="sv" id="monthlyNet">$0</div></div></div>
+<div class="st">Quick Add</div>
+<div class="qa"><button class="qb" onclick="openModal('expense','food')">🍔 Food</button><button class="qb" onclick="openModal('expense','transport')">🚗 Transport</button><button class="qb" onclick="openModal('expense','shopping')">🛍️ Shopping</button><button class="qb" onclick="openModal('expense','groceries')">🛒 Groceries</button><button class="qb" onclick="openModal('income','salary')">💰 Salary</button><button class="qb" onclick="showTab('stats')">📊</button></div>
+<div class="st">Recent</div>
+<div class="tl" id="transactionList"></div>
+</div>
+<div class="cnt hd" id="statsView" style="margin-bottom:100px">
+<div class="st">Bitcoin Holding</div>
+<div class="nwc" style="text-align:left">
+<div style="display:flex;justify-content:space-between;margin-bottom:16px"><div><div style="color:var(--ts);font-size:12px;margin-bottom:4px">YOUR BTC</div><div style="font-size:28px;font-weight:700" id="btcDisplay">0.00 BTC</div></div><div style="text-align:right"><div style="color:var(--ts);font-size:12px;margin-bottom:4px">VALUE</div><div style="font-size:24px;font-weight:600;color:var(--acc)" id="btcValueDisplay">$0</div></div></div>
+<button class="sb" style="background:var(--inp);color:var(--text)" onclick="openBTCModal()">Update BTC</button>
+</div>
+<div class="st">This Month</div>
+<div class="nwc" style="text-align:left">
+<div style="display:flex;justify-content:space-between;margin-bottom:12px"><span style="color:var(--ts)">Income</span><span style="color:var(--grn)" id="statsIncome">$0</span></div>
+<div style="display:flex;justify-content:space-between;margin-bottom:12px"><span style="color:var(--ts)">Expenses</span><span style="color:var(--red)" id="statsExpenses">$0</span></div>
+<div style="display:flex;justify-content:space-between;padding-top:12px;border-top:1px solid var(--inp)"><span style="font-weight:600">Net</span><span id="statsNet">$0</span></div>
+</div>
+<div class="st">vs Last Month</div>
+<div class="nwc" style="text-align:left">
+<div style="display:flex;justify-content:space-between;margin-bottom:12px"><span style="color:var(--ts)">Income</span><span id="incomeVsLast"><span style="color:var(--grn)">-</span></span></div>
+<div style="display:flex;justify-content:space-between;margin-bottom:12px"><span style="color:var(--ts)">Expenses</span><span id="expensesVsLast"><span style="color:var(--grn)">-</span></span></div>
+<div style="display:flex;justify-content:space-between"><span style="color:var(--ts)">Net Worth</span><span id="nwVsLast"><span style="color:var(--grn)">-</span></span></div>
+</div>
+<div class="st">Ledn</div>
+<div class="nwc" style="text-align:left">
+<div style="display:flex;justify-content:space-between;margin-bottom:12px"><span style="color:var(--ts)">Collateral</span><span style="font-weight:600;color:var(--acc)" id="loanBtcDisplayStats">₿ 0.00</span></div>
+<div style="display:flex;justify-content:space-between"><span style="color:var(--ts)">LTV</span><span id="ltvDisplayStats">0%</span></div>
+</div>
+<div class="st">Spending by Category</div>
+<div class="nwc" style="padding:16px;min-height:200px">
+<canvas id="categoryChart" height="200" style="width:100%;max-width:300px;display:block;margin:0 auto"></canvas>
+</div>
+<div class="st">Recurring Bills</div>
+<div class="nwc" style="text-align:left">
+<div id="recurringList"></div>
+<button class="sb" style="background:var(--inp);color:var(--text);margin-top:12px" onclick="openRecurringModal()">+ Add Recurring</button>
+</div>
+<div class="st">Bitcoin Standard</div>
+<div class="nwc" style="text-align:left;cursor:pointer" onclick="openBtcStandardModal()">
+<div style="display:flex;justify-content:space-between;margin-bottom:12px"><span style="color:var(--ts)">% Net Worth in BTC</span><span style="font-weight:600;color:var(--acc)" id="btcPercentDisplay">0%</span></div>
+<div style="display:flex;justify-content:space-between;margin-bottom:12px"><span style="color:var(--ts)">BTC vs Fiat</span><span style="font-weight:600" id="btcFiatRatioDisplay">0%</span></div>
+<div style="display:flex;justify-content:space-between;margin-bottom:12px"><span style="color:var(--ts)">⚡ Sats Saved</span><span style="font-weight:600;color:#ffd60a" id="satsSavedDisplay">0</span></div>
+<div style="display:flex;justify-content:space-between;margin-bottom:12px"><span style="color:var(--ts)">📊 Cost Basis</span><span style="font-weight:600" id="costBasisDisplay">$0</span></div>
+<div style="display:flex;justify-content:space-between"><span style="color:var(--ts)">📈 BTC P/L</span><span style="font-weight:600" id="btcPLDisplay">0%</span></div>
+</div>
+<div class="st">Net Worth History</div>
+<div class="nwc" style="padding:16px">
+<canvas id="netWorthChart" height="200"></canvas>
+<div id="chartPlaceholder" style="text-align:center;color:var(--ts);padding:20px">Collecting data...</div>
+</div>
+</div>
+<button class="fab" onclick="openModal()">+</button>
+<div class="mod" id="transactionModal">
+<div class="modc">
+<div class="modh"><div class="modt">Add Transaction</div><button class="modx" onclick="closeModal()">✕</button></div>
+<div class="tt"><button class="act" id="typeExpense" onclick="setType('expense')">Expense</button><button id="typeIncome" onclick="setType('income')">Income</button></div>
+<div class="fg"><label>Amount</label><input type="number" id="txAmount" placeholder="0.00" step="0.01"></div>
+<div class="fg"><label>Pay From</label><select id="txSource"><option value="cash">Cash Balance</option><option value="bank">Bank Balance</option></select></div>
+<div class="fg"><label>Category</label><select id="txCategory"><optgroup label="Income"><option value="salary">💰 Salary</option><option value="investment">📈 Investment</option><option value="freelance">💻 Freelance</option><option value="other-income">📦 Other</option></optgroup><optgroup label="Expenses"><option value="food">🍔 Food</option><option value="transport">🚗 Transport</option><option value="utilities">💡 Utilities</option><option value="entertainment">🎬 Entertainment</option><option value="shopping">🛍️ Shopping</option><option value="health">🏥 Health</option><option value="groceries">🛒 Groceries</option><option value="other">📦 Other</option></optgroup></select></div>
+<div class="fg"><label>Description</label><input type="text" id="txDesc" placeholder="What's this for?"></div>
+<div class="fg"><label>Date</label><input type="date" id="txDate"></div>
+<button class="sb" onclick="saveTransaction()">Save</button>
+</div>
+</div>
+<div class="mod" id="btcModal"><div class="modc"><div class="modh"><div class="modt">Update BTC</div><button class="modx" onclick="closeBTCModal()">✕</button></div><div class="fg"><label>Bitcoin Amount</label><input type="number" id="btcInput" placeholder="0.00" step="0.00000001"></div><button class="sb" onclick="saveBTC()">Save</button></div></div>
+<div class="mod" id="loanModal"><div class="modc"><div class="modh"><div class="modt">Ledn</div><button class="modx" onclick="closeLoanModal()">✕</button></div><div class="fg"><label>Loan Amount (BND)</label><input type="number" id="loanAmount" placeholder="0.00" step="0.01"></div><div class="fg"><label>BTC Collateral</label><input type="number" id="loanBtc" placeholder="0.00" step="0.00000001"></div><button class="sb" onclick="saveLoan()">Save</button></div></div>
+<div class="mod" id="cashModal"><div class="modc"><div class="modh"><div class="modt">Cash Balance</div><button class="modx" onclick="closeCashModal()">✕</button></div><div class="fg"><label>Initial Cash (BND)</label><input type="number" id="cashInput" placeholder="0.00" step="0.01"></div><button class="sb" onclick="saveCash()">Save</button></div></div>
+<div class="mod" id="bankModal"><div class="modc"><div class="modh"><div class="modt">Bank Balance</div><button class="modx" onclick="closeBankModal()">✕</button></div><div class="fg"><label>Initial Bank Balance (BND)</label><input type="number" id="bankInput" placeholder="0.00" step="0.01"></div><button class="sb" onclick="saveBank()">Save</button></div></div>
+<div class="mod" id="btcStandardModal"><div class="modc"><div class="modh"><div class="modt">Holdings</div><button class="modx" onclick="closeBtcStandardModal()">✕</button></div><div style="background:var(--inp);border-radius:16px;padding:20px;margin-bottom:16px"><div style="color:var(--ts);font-size:12px;margin-bottom:8px">FIAT</div><div style="font-size:28px;font-weight:700;color:var(--grn)" id="fiatHoldingsDisplay">BND 0</div></div><div style="background:var(--inp);border-radius:16px;padding:20px;margin-bottom:16px"><div style="color:var(--ts);font-size:12px;margin-bottom:8px">BTC</div><div style="font-size:28px;font-weight:700;color:var(--acc)" id="btcHoldingsDisplay">₿ 0.00</div><div style="font-size:14px;color:var(--ts);margin-top:4px" id="btcHoldingsValueDisplay">BND 0</div></div><div class="fg"><label>Cost Basis (total invested)</label><input type="number" id="costBasisInput" placeholder="0.00" step="0.01"><button class="sb" style="margin-top:8px" onclick="saveCostBasis()">Update</button></div></div></div>
+<div class="mod" id="transferModal"><div class="modc"><div class="modh"><div class="modt">Transfer</div><button class="modx" onclick="closeTransferModal()">✕</button></div><div class="fg"><label>From</label><select id="transferFrom"><option value="cash">Cash Balance</option><option value="bank">Bank Balance</option></select></div><div class="fg"><label>To</label><select id="transferTo"><option value="bank">Bank Balance</option><option value="cash">Cash Balance</option></select></div><div class="fg"><label>Amount (BND)</label><input type="number" id="transferAmount" placeholder="0.00" step="0.01"></div><button class="sb" onclick="saveTransfer()">Transfer</button></div></div></div>
+<div class="mod" id="recurringModal"><div class="modc"><div class="modh"><div class="modt">Add Recurring</div><button class="modx" onclick="closeRecurringModal()">✕</button></div><div class="fg"><label>Name</label><input type="text" id="recurringName" placeholder="Netflix, Rent, etc."></div><div class="fg"><label>Amount</label><input type="number" id="recurringAmount" placeholder="0.00" step="0.01"></div><div class="fg"><label>Category</label><select id="recurringCategory"><option value="food">🍔</option><option value="transport">🚗</option><option value="utilities">💡</option><option value="entertainment">🎬</option><option value="shopping">🛍️</option><option value="health">🏥</option><option value="groceries">🛒</option><option value="other">📦</option></select></div><div class="fg"><label>Frequency</label><select id="recurringFreq"><option value="weekly">Weekly</option><option value="monthly" selected>Monthly</option><option value="yearly">Yearly</option></select></div><div class="fg"><label>Next Due</label><input type="date" id="recurringDue"></div><button class="sb" onclick="saveRecurring()">Save</button></div></div>
+<div class="tb"><div class="ti act" id="tabFinance" onclick="showTab('finance')"><span>💳</span>Finance</div><div class="ti" id="tabAdd" onclick="showTab('add')"><span>➕</span>Add</div><div class="ti" id="tabStats" onclick="showTab('stats')"><span>📈</span>Stats</div></div>
+<script>
+var btcPrice = 68000;
+var toUsdRate = 1.34;
+var exchangeRate = {USD: 1/toUsdRate, BND: 1};
+var currency = localStorage.getItem('currency') || 'BND';
+var currentType = 'expense';
+var netWorthChart = null;
+var categoryChart = null;
+
+var ci = {food:'🍔',transport:'🚗',utilities:'💡',entertainment:'🎬',shopping:'🛍️',health:'🏥',salary:'💰',investment:'📈',freelance:'💻','other-income':'📦',groceries:'🛒',other:'📦'};
+var cn = {food:'Food',transport:'Transport',utilities:'Utilities',entertainment:'Entertainment',shopping:'Shopping',health:'Health',salary:'Salary',investment:'Investment',freelance:'Freelance','other-income':'Other',groceries:'Groceries',other:'Other'};
+
+document.getElementById('cdate').textContent = new Date().toLocaleDateString('en-US', {weekday:'short', month:'short', day:'numeric'});
+
+function init() {
+    loadData();
+    fetchExchangeRate();
+    fetchBTCPrice();
+}
+
+function fetchExchangeRate() {
+    var cached = JSON.parse(localStorage.getItem('usdBndRate') || '{}');
+    if (cached.rate && cached.timestamp > Date.now() - 3600000) {
+        toUsdRate = cached.rate;
+        exchangeRate = {USD: 1/toUsdRate, BND: 1};
+        return;
+    }
+    fetch('https://open.er-api.com/v6/latest/USD')
+        .then(function(r) { return r.json(); })
+        .then(function(d) {
+            if (d.rates && d.rates.BND) {
+                toUsdRate = d.rates.BND;
+                exchangeRate = {USD: 1/toUsdRate, BND: 1};
+                localStorage.setItem('usdBndRate', JSON.stringify({rate: toUsdRate, timestamp: Date.now()}));
+            }
+        })
+        .catch(function(e) { console.log(e); });
+}
+
+function fetchBTCPrice() {
+    fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true')
+        .then(function(r) { return r.json(); })
+        .then(function(d) {
+            btcPrice = d.bitcoin.usd;
+            document.getElementById('btcPrice').textContent = '$' + btcPrice.toLocaleString();
+            var chg = d.bitcoin.usd_24h_change;
+            var de = document.getElementById('btcDailyChange');
+            var bh = parseFloat(localStorage.getItem('btcHoldings') || '0');
+            if (chg !== undefined && bh > 0) {
+                var amt = btcPrice * toUsdRate * (chg/100) * bh * exchangeRate[currency];
+                var ar = chg >= 0 ? '↑' : '↓';
+                de.innerHTML = 'BTC ' + ar + Math.abs(chg).toFixed(1) + '% today <span style="color:var(--ts)">(' + (amt>=0?'+':'') + (exchangeRate[currency]===1?'BND ':'$') + Math.abs(amt).toFixed(0) + ')</span>';
+            }
+        })
+        .catch(function(e) { console.log(e); });
+}
+
+function fetchBTCPriceHistory() {
+    return fetch('https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=365&interval=daily')
+        .then(function(r) { return r.json(); })
+        .then(function(d) {
+            return d.prices || [];
+        })
+        .catch(function(e) { 
+            console.log('BTC history error:', e); 
+            return []; 
+        });
+}
+
+function loadData() {
+    var txs = JSON.parse(localStorage.getItem('transactions') || '[]');
+    var btc = parseFloat(localStorage.getItem('btcHoldings') || '0');
+    var loan = JSON.parse(localStorage.getItem('loan') || '{"amount":0,"btc":0}');
+    // Get initial balances
+    var initialCash = parseFloat(localStorage.getItem('cash') || '0');
+    var initialBank = parseFloat(localStorage.getItem('bank') || '0');
+    // Calculate totals from transactions
+    // Calculate income by source
+    var cashIncome = txs.filter(function(x) { return x.type === 'income' && (!x.source || x.source === 'cash'); }).reduce(function(s, x) { return s + x.amount; }, 0);
+    var bankIncome = txs.filter(function(x) { return x.type === 'income' && x.source === 'bank'; }).reduce(function(s, x) { return s + x.amount; }, 0);
+    // Calculate expenses by source
+    var cashExpenses = txs.filter(function(x) { return x.type === 'expense' && (!x.source || x.source === 'cash'); }).reduce(function(s, x) { return s + x.amount; }, 0);
+    var bankExpenses = txs.filter(function(x) { return x.type === 'expense' && x.source === 'bank'; }).reduce(function(s, x) { return s + x.amount; }, 0);
+    // Calculate running balances
+    var cash = initialCash - cashExpenses + cashIncome;
+    var bank = initialBank - bankExpenses + bankIncome;
+    var rt = exchangeRate[currency];
+    var sm = currency === 'USD' ? '$' : 'BND ';
+    
+    var lv = btc * btcPrice * toUsdRate * rt;
+    document.getElementById('ledgerBtcDisplay').innerHTML = '₿ ' + btc.toFixed(4);
+    document.getElementById('ledgerValueDisplay').textContent = sm + lv.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    
+    if (loan.btc > 0) {
+        var cv = loan.btc * btcPrice * toUsdRate * rt;
+        var ltv = cv > 0 ? (loan.amount / cv) * 100 : 0;
+        document.getElementById('loanBtcDisplay').innerHTML = '₿ ' + loan.btc.toFixed(4);
+        document.getElementById('ltvQuickDisplay').textContent = 'LTV ' + ltv.toFixed(0) + '%';
+    } else {
+        document.getElementById('loanBtcDisplay').innerHTML = '₿ 0.00';
+        document.getElementById('ltvQuickDisplay').textContent = 'LTV 0%';
+    }
+    
+    document.getElementById('loanQuickDisplay').textContent = '-' + sm + (loan.amount || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    document.getElementById('cashDisplay').textContent = sm + (cash * rt).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    document.getElementById('bankDisplay').textContent = sm + (bank * rt).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    
+    var la = loan.amount || 0;
+    var tBtc = btc + (loan.btc || 0);
+    var bV = tBtc * btcPrice * toUsdRate * rt;
+    var nw = cash * rt + bank * rt + bV - la;
+    
+    document.getElementById('totalNetWorth').textContent = sm + nw.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    
+    var now = new Date();
+    var mtx = txs.filter(function(x) { return new Date(x.date) >= new Date(now.getFullYear(), now.getMonth(), 1); });
+    var inc = mtx.filter(function(x) { return x.type === 'income'; }).reduce(function(s, x) { return s + x.amount; }, 0) * rt;
+    var exp = mtx.filter(function(x) { return x.type === 'expense'; }).reduce(function(s, x) { return s + x.amount; }, 0) * rt;
+    var ne = inc - exp;
+    
+    document.getElementById('monthlyIncome').textContent = sm + inc.toFixed(0);
+    document.getElementById('monthlyExpenses').textContent = sm + exp.toFixed(0);
+    document.getElementById('monthlyNet').textContent = (ne >= 0 ? '+' : '') + sm + ne.toFixed(0);
+    document.getElementById('monthlyNet').className = 'sv ' + (ne >= 0 ? 'g' : 'r');
+    
+    var btcPct = nw > 0 ? (bV / nw) * 100 : 0;
+    document.getElementById('btcPercentDisplay').textContent = btcPct.toFixed(1) + '%';
+    
+    var fiat = cash * rt;
+    var tot = bV + fiat;
+    var btcRat = tot > 0 ? (bV / tot) * 100 : 0;
+    document.getElementById('btcFiatRatioDisplay').textContent = btcRat.toFixed(1) + '%';
+    
+    // Sats saved
+    var satsSaved = Math.floor(tBtc * 100000000);
+    document.getElementById('satsSavedDisplay').textContent = satsSaved.toLocaleString() + ' sats';
+    
+    // Cost basis
+    var costBasis = parseFloat(localStorage.getItem('costBasis') || '0');
+    document.getElementById('costBasisDisplay').textContent = sm + costBasis.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    
+    // BTC P/L
+    var btcPL = costBasis > 0 ? ((bV - costBasis) / costBasis) * 100 : 0;
+    var plEl = document.getElementById('btcPLDisplay');
+    plEl.textContent = (btcPL >= 0 ? '+' : '') + btcPL.toFixed(1) + '%';
+    plEl.style.color = btcPL >= 0 ? 'var(--grn)' : 'var(--red)';
+    
+    renderTxs(txs);
+    updateStats();
+    saveNetWorth(nw);
+}
+
+function saveNetWorth(nw) {
+    var h = JSON.parse(localStorage.getItem('netWorthHistory') || '[]');
+    var td = new Date().toISOString().split('T')[0];
+    var i = h.findIndex(function(x) { return x.date.startsWith(td); });
+    if (i >= 0) {
+        h[i].value = nw;
+    } else {
+        h.push({date: new Date().toISOString(), value: nw});
+    }
+    localStorage.setItem('netWorthHistory', JSON.stringify(h));
+}
+
+function renderTxs(txs) {
+    var l = document.getElementById('transactionList');
+    if (!txs.length) {
+        l.innerHTML = '<div style="text-align:center;padding:40px;color:var(--ts)">No transactions yet</div>';
+        return;
+    }
+    l.innerHTML = txs.slice().reverse().slice(0, 20).map(function(x, i) {
+        var idx = txs.length - 1 - i;
+        return '<div class="tx" data-idx="' + idx + '" ontouchstart="touchStart(event, this)" ontouchend="touchEnd(event, this)" ontouchmove="touchMove(event, this)"><div class="txic" style="background:' + (x.type === 'income' ? 'rgba(48,209,88,0.15)' : 'rgba(255,69,58,0.15)') + '">' + ci[x.category] + '</div><div class="txd"><div class="txdn">' + (x.desc || cn[x.category]) + '</div><div class="txm">' + new Date(x.date).toLocaleDateString() + '</div></div><div class="txa ' + (x.type === 'income' ? 'p' : 'n') + '">' + (x.type === 'income' ? '+' : '-') + '$' + x.amount.toFixed(2) + '</div><div class="tx-actions"><button onclick="editTx(' + idx + ')">Edit</button><button onclick="deleteTx(' + idx + ')" style="background:var(--red)">Delete</button></div></div>';
+    }).join('');
+}
+
+var touchStartX = 0;
+var touchStartY = 0;
+var swipingTx = null;
+
+function touchStart(e, el) {
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+    swipingTx = el;
+}
+
+function touchMove(e, el) {
+    var dx = e.touches[0].clientX - touchStartX;
+    var dy = e.touches[0].clientY - touchStartY;
+    if (Math.abs(dx) > Math.abs(dy) && dx < -30) {
+        el.classList.add('swiped');
+    }
+}
+
+function touchEnd(e, el) {
+    setTimeout(function() { el.classList.remove('swiped'); }, 2000);
+}
+
+function editTx(idx) {
+    var txs = JSON.parse(localStorage.getItem('transactions') || '[]');
+    var tx = txs[idx];
+    if (!tx) return;
+    setType(tx.type);
+    document.getElementById('txCategory').value = tx.category;
+    document.getElementById('txAmount').value = tx.amount;
+    document.getElementById('txDesc').value = tx.desc || '';
+    document.getElementById('txDate').value = tx.date.split('T')[0];
+    currentTxIndex = idx;
+    document.getElementById('transactionModal').style.display = 'flex';
+    document.getElementById('txAmount').focus();
+}
+
+function deleteTx(idx) {
+    if (!confirm('Delete this transaction?')) return;
+    var txs = JSON.parse(localStorage.getItem('transactions') || '[]');
+    txs.splice(idx, 1);
+    localStorage.setItem('transactions', JSON.stringify(txs));
+    loadData();
+}
+
+var currentTxIndex = -1;
+
+function updateStats() {
+    var btc = parseFloat(localStorage.getItem('btcHoldings') || '0');
+    var loan = JSON.parse(localStorage.getItem('loan') || '{"amount":0,"btc":0}');
+    var rt = exchangeRate[currency];
+    var sm = currency === 'USD' ? '$' : 'BND ';
+    var txs = JSON.parse(localStorage.getItem('transactions') || '[]');
+    var now = new Date();
+    var mtx = txs.filter(function(x) { return new Date(x.date) >= new Date(now.getFullYear(), now.getMonth(), 1); });
+    var inc = mtx.filter(function(x) { return x.type === 'income'; }).reduce(function(s, x) { return s + x.amount; }, 0) * rt;
+    var exp = mtx.filter(function(x) { return x.type === 'expense'; }).reduce(function(s, x) { return s + x.amount; }, 0) * rt;
+    
+    document.getElementById('btcDisplay').textContent = btc.toFixed(8) + ' BTC';
+    document.getElementById('btcValueDisplay').textContent = sm + (btc * btcPrice * toUsdRate * rt).toLocaleString();
+    document.getElementById('statsIncome').textContent = sm + inc.toFixed(0);
+    document.getElementById('statsExpenses').textContent = sm + exp.toFixed(0);
+    document.getElementById('statsNet').textContent = (inc >= exp ? '+' : '') + sm + (inc - exp).toFixed(0);
+    
+    // Last month stats
+    var lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    var lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
+    var lmtx = txs.filter(function(x) { var d = new Date(x.date); return d >= lastMonthStart && d <= lastMonthEnd; });
+    var linc = lmtx.filter(function(x) { return x.type === 'income'; }).reduce(function(s, x) { return s + x.amount; }, 0) * rt;
+    var lexp = lmtx.filter(function(x) { return x.type === 'expense'; }).reduce(function(s, x) { return s + x.amount; }, 0) * rt;
+    
+    // Compare income
+    var incDiff = inc - linc;
+    var incPct = linc > 0 ? (incDiff / linc) * 100 : 0;
+    var incColor = incDiff >= 0 ? 'var(--grn)' : 'var(--red)';
+    document.getElementById('incomeVsLast').innerHTML = '<span style="color:' + incColor + '">' + (incDiff >= 0 ? '+' : '') + incDiff.toFixed(0) + ' (' + incPct.toFixed(0) + '%)</span>';
+    
+    // Compare expenses
+    var expDiff = exp - lexp;
+    var expPct = lexp > 0 ? (expDiff / lexp) * 100 : 0;
+    var expColor = expDiff <= 0 ? 'var(--grn)' : 'var(--red)';
+    document.getElementById('expensesVsLast').innerHTML = '<span style="color:' + expColor + '">' + (expDiff >= 0 ? '+' : '') + expDiff.toFixed(0) + ' (' + expPct.toFixed(0) + '%)</span>';
+    
+    // Compare net worth (current vs last month end)
+    var lastMonthNW = (cash * rt - exp) + linc + bV - la;
+    var nwDiff = nw - lastMonthNW;
+    var nwPct = lastMonthNW > 0 ? (nwDiff / lastMonthNW) * 100 : 0;
+    var nwColor = nwDiff >= 0 ? 'var(--grn)' : 'var(--red)';
+    document.getElementById('nwVsLast').innerHTML = '<span style="color:' + nwColor + '">' + (nwDiff >= 0 ? '+' : '') + nwDiff.toFixed(0) + ' (' + nwPct.toFixed(0) + '%)</span>';
+    
+    if (loan.btc > 0) {
+        var cv = loan.btc * btcPrice * toUsdRate * rt;
+        var ltv = cv > 0 ? (loan.amount / cv) * 100 : 0;
+        document.getElementById('loanBtcDisplayStats').innerHTML = '₿ ' + loan.btc.toFixed(4);
+        document.getElementById('ltvDisplayStats').textContent = ltv.toFixed(1) + '%';
+    }
+}
+
+function toggleCurrency() {
+    currency = currency === 'USD' ? 'BND' : 'USD';
+    localStorage.setItem('currency', currency);
+    loadData();
+}
+
+function openModal(t, cat) {
+    console.log('openModal called', t, cat);
+    currentTxIndex = -1;
+    if (t) {
+        setType(t);
+        if (cat) document.getElementById('txCategory').value = cat;
+    }
+    document.getElementById('txDate').value = new Date().toISOString().split('T')[0];
+    var modal = document.getElementById('transactionModal');
+    modal.style.display = 'flex';
+    document.getElementById('txAmount').focus();
+}
+
+function closeModal() {
+    document.getElementById('transactionModal').style.display = 'none';
+    document.getElementById('txAmount').value = '';
+    document.getElementById('txDesc').value = '';
+    currentTxIndex = -1;
+}
+
+function setType(t) {
+    currentType = t;
+    document.getElementById('typeExpense').className = t === 'expense' ? 'act' : '';
+    document.getElementById('typeIncome').className = t === 'income' ? 'act' : '';
+}
+
+function saveTransaction() {
+    var amt = parseFloat(document.getElementById('txAmount').value);
+    if (!amt) return alert('Enter amount');
+    var source = document.getElementById('txSource').value;
+    var t = JSON.parse(localStorage.getItem('transactions') || '[]');
+    if (currentTxIndex >= 0) {
+        t[currentTxIndex] = {
+            type: currentType,
+            amount: amt,
+            source: source,
+            category: document.getElementById('txCategory').value,
+            desc: document.getElementById('txDesc').value,
+            date: new Date(document.getElementById('txDate').value || new Date().toISOString().split('T')[0]).toISOString()
+        };
+        currentTxIndex = -1;
+    } else {
+        t.push({
+            type: currentType,
+            amount: amt,
+            source: source,
+            category: document.getElementById('txCategory').value,
+            desc: document.getElementById('txDesc').value,
+            date: new Date(document.getElementById('txDate').value || new Date().toISOString().split('T')[0]).toISOString()
+        });
+    }
+    localStorage.setItem('transactions', JSON.stringify(t));
+    closeModal();
+    loadData();
+}
+
+function openBTCModal() {
+    document.getElementById('btcInput').value = localStorage.getItem('btcHoldings') || '';
+    document.getElementById('btcModal').style.display = 'flex';
+}
+
+function closeBTCModal() {
+    document.getElementById('btcModal').style.display = 'none';
+}
+
+function saveBTC() {
+    localStorage.setItem('btcHoldings', document.getElementById('btcInput').value);
+    closeBTCModal();
+    loadData();
+}
+
+function openLoanModal() {
+    var l = JSON.parse(localStorage.getItem('loan') || '{"amount":0,"btc":0}');
+    document.getElementById('loanAmount').value = l.amount || '';
+    document.getElementById('loanBtc').value = l.btc || '';
+    document.getElementById('loanModal').style.display = 'flex';
+}
+
+function closeLoanModal() {
+    document.getElementById('loanModal').style.display = 'none';
+}
+
+function saveLoan() {
+    localStorage.setItem('loan', JSON.stringify({
+        amount: parseFloat(document.getElementById('loanAmount').value) || 0,
+        btc: parseFloat(document.getElementById('loanBtc').value) || 0
+    }));
+    closeLoanModal();
+    loadData();
+}
+
+function openCashModal() {
+    document.getElementById('cashInput').value = localStorage.getItem('cash') || '';
+    document.getElementById('cashModal').style.display = 'flex';
+}
+
+function closeCashModal() {
+    document.getElementById('cashModal').style.display = 'none';
+}
+
+function saveCash() {
+    localStorage.setItem('cash', document.getElementById('cashInput').value);
+    closeCashModal();
+    loadData();
+}
+
+function openBankModal() {
+    document.getElementById('bankInput').value = localStorage.getItem('bank') || '';
+    document.getElementById('bankModal').style.display = 'flex';
+}
+
+function closeBankModal() {
+    document.getElementById('bankModal').style.display = 'none';
+}
+
+function saveBank() {
+    localStorage.setItem('bank', document.getElementById('bankInput').value);
+    closeBankModal();
+    loadData();
+}
+
+function openTransferModal() {
+    document.getElementById('transferAmount').value = '';
+    document.getElementById('transferFrom').value = 'cash';
+    document.getElementById('transferTo').value = 'bank';
+    document.getElementById('transferModal').style.display = 'flex';
+}
+
+function closeTransferModal() {
+    document.getElementById('transferModal').style.display = 'none';
+}
+
+function saveTransfer() {
+    var amt = parseFloat(document.getElementById('transferAmount').value);
+    if (!amt || amt <= 0) return alert('Enter valid amount');
+    var from = document.getElementById('transferFrom').value;
+    var to = document.getElementById('transferTo').value;
+    
+    if (from === to) return alert('Select different accounts');
+    
+    var cash = parseFloat(localStorage.getItem('cash') || '0');
+    var bank = parseFloat(localStorage.getItem('bank') || '0');
+    
+    if (from === 'cash' && amt > cash) return alert('Insufficient cash balance');
+    if (from === 'bank' && amt > bank) return alert('Insufficient bank balance');
+    
+    if (from === 'cash') cash -= amt;
+    else bank -= amt;
+    
+    if (to === 'cash') cash += amt;
+    else bank += amt;
+    
+    localStorage.setItem('cash', cash);
+    localStorage.setItem('bank', bank);
+    closeTransferModal();
+    loadData();
+}
+
+function exportData() {
+    var data = {
+        transactions: JSON.parse(localStorage.getItem('transactions') || '[]'),
+        btcHoldings: localStorage.getItem('btcHoldings'),
+        cash: localStorage.getItem('cash'),
+        bank: localStorage.getItem('bank'),
+        loan: localStorage.getItem('loan'),
+        currency: localStorage.getItem('currency'),
+        netWorthHistory: JSON.parse(localStorage.getItem('netWorthHistory') || '[]'),
+        recurring: JSON.parse(localStorage.getItem('recurring') || '[]'),
+        costBasis: localStorage.getItem('costBasis')
+    };
+    var blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'finance-backup-' + new Date().toISOString().split('T')[0] + '.json';
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+function importData(file) {
+    var reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            var data = JSON.parse(e.target.result);
+            if (data.transactions) localStorage.setItem('transactions', JSON.stringify(data.transactions));
+            if (data.btcHoldings) localStorage.setItem('btcHoldings', data.btcHoldings);
+            if (data.cash) localStorage.setItem('cash', data.cash);
+            if (data.bank) localStorage.setItem('bank', data.bank);
+            if (data.loan) localStorage.setItem('loan', data.loan);
+            if (data.currency) localStorage.setItem('currency', data.currency);
+            if (data.netWorthHistory) localStorage.setItem('netWorthHistory', JSON.stringify(data.netWorthHistory));
+            if (data.recurring) localStorage.setItem('recurring', JSON.stringify(data.recurring));
+            if (data.costBasis) localStorage.setItem('costBasis', data.costBasis);
+            loadData();
+            alert('Data imported successfully!');
+        } catch(err) {
+            alert('Error importing data: ' + err.message);
+        }
+    };
+    reader.readAsText(file);
+}
+
+function openBtcStandardModal() {
+    var btc = parseFloat(localStorage.getItem('btcHoldings') || '0');
+    var loan = JSON.parse(localStorage.getItem('loan') || '{"amount":0,"btc":0}');
+    var cash = parseFloat(localStorage.getItem('cash') || '0');
+    var rt = exchangeRate[currency];
+    var sm = currency === 'USD' ? '$' : 'BND ';
+    var fh = cash * rt;
+    document.getElementById('fiatHoldingsDisplay').textContent = sm + fh.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    var totalBtc = btc + (loan.btc || 0);
+    var bV = totalBtc * btcPrice * toUsdRate * rt;
+    document.getElementById('btcHoldingsDisplay').innerHTML = '₿ ' + btc.toFixed(4) + ' <span style="font-size:14px;color:var(--ts)">+ ₿ ' + (loan.btc || 0).toFixed(4) + '</span>';
+    document.getElementById('btcHoldingsValueDisplay').textContent = sm + bV.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    document.getElementById('costBasisInput').value = localStorage.getItem('costBasis') || '';
+    document.getElementById('btcStandardModal').style.display = 'flex';
+}
+
+function saveCostBasis() {
+    var cb = parseFloat(document.getElementById('costBasisInput').value) || 0;
+    localStorage.setItem('costBasis', cb);
+    closeBtcStandardModal();
+    loadData();
+}
+
+function closeBtcStandardModal() {
+    document.getElementById('btcStandardModal').style.display = 'none';
+}
+
+function showTab(tab) {
+    document.querySelectorAll('.ti').forEach(function(x) { x.classList.remove('act'); });
+    if (tab === 'finance') {
+        document.getElementById('tabFinance').classList.add('act');
+        document.getElementById('financeView').classList.remove('hd');
+        document.getElementById('statsView').classList.add('hd');
+    }
+    if (tab === 'add') {
+        document.getElementById('tabAdd').classList.add('act');
+        openModal();
+    }
+    if (tab === 'stats') {
+        document.getElementById('tabStats').classList.add('act');
+        document.getElementById('financeView').classList.add('hd');
+        document.getElementById('statsView').classList.remove('hd');
+        setTimeout(function() {
+            loadNetWorthChart();
+            loadCategoryChart();
+            renderRecurring();
+        }, 100);
+    }
+}
+
+function loadNetWorthChart() {
+    var rt = exchangeRate[currency];
+    var sm = currency === 'USD' ? '$' : 'BND ';
+    
+    // Always generate historical chart based on BTC price history
+    document.getElementById('chartPlaceholder').textContent = 'Loading historical data...';
+    fetchBTCPriceHistory().then(function(priceHistory) {
+        if (priceHistory.length === 0) {
+            document.getElementById('chartPlaceholder').textContent = 'Could not load history';
+            return;
+        }
+        
+        var btc = parseFloat(localStorage.getItem('btcHoldings') || '0');
+        var loan = JSON.parse(localStorage.getItem('loan') || '{"amount":0,"btc":0}');
+        var cash = parseFloat(localStorage.getItem('cash') || '0');
+        var la = loan.amount || 0;
+        
+        // Build historical net worth data
+        var histData = priceHistory.map(function(p) {
+            var date = new Date(p[0]);
+            var price = p[1];
+            var bV = btc * price * toUsdRate * rt;
+            var nw = cash * rt + bV - la;
+            return { date: date, value: nw };
+        });
+        
+        // Filter to last year
+        var oneYearAgo = new Date();
+        oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+        var f = histData.filter(function(x) { return x.date >= oneYearAgo; });
+        
+        if (f.length < 2) {
+            document.getElementById('chartPlaceholder').textContent = 'Not enough data';
+            return;
+        }
+        
+        document.getElementById('chartPlaceholder').style.display = 'none';
+        document.getElementById('netWorthChart').style.display = 'block';
+        
+        var ls = f.map(function(x) {
+            return x.date.toLocaleDateString('en-US', {month:'short', day:'numeric'});
+        });
+        var vs = f.map(function(x) { return x.value; });
+        
+        renderNetWorthChart(ls, vs);
+    });
+}
+
+function renderNetWorthChart(labels, data) {
+    var ctx = document.getElementById('netWorthChart').getContext('2d');
+    if (netWorthChart) netWorthChart.destroy();
+    var sm = currency === 'USD' ? '$' : 'BND ';
+    netWorthChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Net Worth',
+                data: data,
+                borderColor: '#30d158',
+                backgroundColor: 'rgba(48,209,88,0.1)',
+                fill: true,
+                tension: 0.4,
+                pointRadius: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                x: {
+                    grid: { display: false },
+                    ticks: { color: '#8e8e93', maxTicksLimit: 6 }
+                },
+                y: {
+                    grid: { color: 'rgba(255,255,255,0.1)' },
+                    ticks: {
+                        color: '#8e8e93',
+                        callback: function(v) {
+                            return (exchangeRate[currency] === 1 ? 'BND ' : '$') + v.toLocaleString();
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+function loadCategoryChart() {
+    try {
+    var txs = JSON.parse(localStorage.getItem('transactions') || '[]');
+    var now = new Date();
+    var mtx = txs.filter(function(x) { return x.type === 'expense' && new Date(x.date) >= new Date(now.getFullYear(), now.getMonth(), 1); });
+    
+    var catTotals = {};
+    mtx.forEach(function(x) {
+        catTotals[x.category] = (catTotals[x.category] || 0) + x.amount;
+    });
+    
+    var labels = Object.keys(catTotals).map(function(k) { return cn[k] || k; });
+    var data = Object.values(catTotals);
+    
+    // Debug: show what we found
+    if (data.length === 0) {
+        document.getElementById('categoryChart').style.display = 'none';
+        var container = document.getElementById('categoryChart').parentNode;
+        if (!document.getElementById('categoryPlaceholder')) {
+            var ph = document.createElement('div');
+            ph.id = 'categoryPlaceholder';
+            ph.style.cssText = 'text-align:center;padding:40px;color:var(--ts)';
+            ph.textContent = 'No expenses this month';
+            container.appendChild(ph);
+        }
+        return;
+    }
+    
+    var ph = document.getElementById('categoryPlaceholder');
+    if (ph) ph.remove();
+    document.getElementById('categoryChart').style.display = 'block';
+    var colors = ['#f7931a', '#30d158', '#ff453a', '#0a84ff', '#bf5af2', '#ff9f0a', '#64d2ff', '#ffd60a'];
+    var total = data.reduce(function(a, b) { return a + b; }, 0);
+    var labelsWithPct = labels.map(function(l, i) { return l + ' (' + ((data[i] / total) * 100).toFixed(1) + '%)'; });
+    var ctx = document.getElementById('categoryChart').getContext('2d');
+    if (categoryChart && typeof categoryChart.destroy === 'function') {
+        categoryChart.destroy();
+    }
+    categoryChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: labelsWithPct,
+            datasets: [{
+                data: data,
+                backgroundColor: colors.slice(0, data.length),
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: { color: '#8e8e93', padding: 12 }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            var value = context.raw;
+                            var pct = ((value / total) * 100).toFixed(1);
+                            return context.label + ': ' + pct + '%';
+                        }
+                    }
+                }
+            }
+        }
+    });
+    } catch(e) { console.log('Chart error:', e); }
+}
+
+function renderRecurring() {
+    var list = document.getElementById('recurringList');
+    var recs = JSON.parse(localStorage.getItem('recurring') || '[]');
+    if (!recs.length) {
+        list.innerHTML = '<div style="color:var(--ts);padding:10px">No recurring bills</div>';
+        return;
+    }
+    list.innerHTML = recs.map(function(r, i) {
+        return '<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--inp)"><div><div style="font-weight:500">' + r.name + '</div><div style="font-size:12px;color:var(--ts)">' + r.freq + ' • Due ' + new Date(r.due).toLocaleDateString() + '</div></div><div style="text-align:right"><div style="color:var(--red)">$' + r.amount.toFixed(2) + '</div><button onclick="deleteRecurring(' + i + ')" style="background:none;border:none;color:var(--ts);font-size:12px;cursor:pointer">Delete</button></div></div>';
+    }).join('');
+}
+
+function openRecurringModal() {
+    document.getElementById('recurringDue').value = new Date().toISOString().split('T')[0];
+    document.getElementById('recurringModal').style.display = 'flex';
+}
+
+function closeRecurringModal() {
+    document.getElementById('recurringModal').style.display = 'none';
+    document.getElementById('recurringName').value = '';
+    document.getElementById('recurringAmount').value = '';
+}
+
+function saveRecurring() {
+    var name = document.getElementById('recurringName').value;
+    var amt = parseFloat(document.getElementById('recurringAmount').value);
+    if (!name || !amt) return alert('Enter name and amount');
+    var recs = JSON.parse(localStorage.getItem('recurring') || '[]');
+    recs.push({
+        name: name,
+        amount: amt,
+        category: document.getElementById('recurringCategory').value,
+        freq: document.getElementById('recurringFreq').value,
+        due: document.getElementById('recurringDue').value
+    });
+    localStorage.setItem('recurring', JSON.stringify(recs));
+    closeRecurringModal();
+    renderRecurring();
+}
+
+function deleteRecurring(i) {
+    var recs = JSON.parse(localStorage.getItem('recurring') || '[]');
+    recs.splice(i, 1);
+    localStorage.setItem('recurring', JSON.stringify(recs));
+    renderRecurring();
+}
+
+(function() {
+    var container = document.querySelector('.qa');
+    var touchSrc = null;
+    var longPressTimer = null;
+    var isDragging = false;
+    
+    // Touch drag and drop for mobile - only after long press
+    container.addEventListener('touchstart', function(e) {
+        if (e.target.classList.contains('qb')) {
+            touchSrc = e.target;
+            longPressTimer = setTimeout(function() {
+                isDragging = true;
+                touchSrc.classList.add('dragging');
+            }, 300);
+        }
+    }, {passive: true});
+    
+    container.addEventListener('touchend', function(e) {
+        clearTimeout(longPressTimer);
+        if (touchSrc) {
+            touchSrc.classList.remove('dragging');
+            if (isDragging) {
+                var order = [];
+                container.querySelectorAll('.qb').forEach(function(btn) {
+                    var m = btn.getAttribute('onclick').match(/openModal\('([^']+)','([^']+)'\)/);
+                    if (m) {
+                        order.push({type: m[1], category: m[2], text: btn.textContent});
+                    }
+                });
+                localStorage.setItem('quickAddOrder', JSON.stringify(order));
+            }
+            touchSrc = null;
+            isDragging = false;
+        }
+    }, {passive: true});
+    
+    container.addEventListener('touchmove', function(e) {
+        if (longPressTimer && isDragging) {
+            clearTimeout(longPressTimer);
+        }
+        if (isDragging && touchSrc) {
+            e.preventDefault();
+            var touch = e.touches[0];
+            var after = getDragAfterElement(container, touch.clientX);
+            var dragging = document.querySelector('.qb.dragging');
+            if (dragging && after) {
+                container.insertBefore(dragging, after);
+            } else if (dragging) {
+                container.appendChild(dragging);
+            }
+        }
+    }, {passive: false});
+    
+    function getDragAfterElement(container, x) {
+        var draggableElements = [...container.querySelectorAll('.qb:not(.dragging)')];
+        return draggableElements.reduce(function(closest, child) {
+            var box = child.getBoundingClientRect();
+            var offset = x - box.left - box.width / 2;
+            if (offset < 0 && offset > closest.offset) {
+                return {offset: offset, element: child};
+            } else {
+                return closest;
+            }
+        }, {offset: Number.NEGATIVE_INFINITY}).element;
+    }
+    
+    var savedOrder = JSON.parse(localStorage.getItem('quickAddOrder') || 'null');
+    if (savedOrder && savedOrder.length > 0) {
+        container.innerHTML = '';
+        savedOrder.forEach(function(item) {
+            var btn = document.createElement('button');
+            btn.className = 'qb';
+            btn.setAttribute('onclick', "openModal('" + item.type + "','" + item.category + "')");
+            btn.textContent = item.text;
+            container.appendChild(btn);
+        });
+    }
+})();
+
+init();
+</script>
+</body>
+</html>
