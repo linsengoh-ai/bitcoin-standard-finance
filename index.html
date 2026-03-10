@@ -157,7 +157,7 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 <div class="mod" id="recurringModal"><div class="modc"><div class="modh"><div class="modt">Add Recurring</div><button class="modx" onclick="closeRecurringModal()">✕</button></div><div class="fg"><label>Name</label><input type="text" id="recurringName" placeholder="Netflix, Rent, etc."></div><div class="fg"><label>Amount</label><input type="number" id="recurringAmount" placeholder="0.00" step="0.01"></div><div class="fg"><label>Category</label><select id="recurringCategory"><option value="food">🍔</option><option value="transport">🚗</option><option value="utilities">💡</option><option value="entertainment">🎬</option><option value="shopping">🛍️</option><option value="health">🏥</option><option value="groceries">🛒</option><option value="other">📦</option></select></div><div class="fg"><label>Frequency</label><select id="recurringFreq"><option value="weekly">Weekly</option><option value="monthly" selected>Monthly</option><option value="yearly">Yearly</option></select></div><div class="fg"><label>Next Due</label><input type="date" id="recurringDue"></div><button class="sb" onclick="saveRecurring()">Save</button></div></div>
 <div class="tb"><div class="ti act" id="tabFinance" onclick="showTab('finance')"><span>💳</span>Finance</div><div class="ti" id="tabAdd" onclick="showTab('add')"><span>➕</span>Add</div><div class="ti" id="tabStats" onclick="showTab('stats')"><span>📈</span>Stats</div></div>
 <script>
-var btcPrice = 69000; // Default fallback
+var btcPrice = 0;
 var toUsdRate = 1.34;
 var exchangeRate = {USD: 1/toUsdRate, BND: 1};
 var currency = localStorage.getItem('currency') || 'BND';
@@ -196,11 +196,11 @@ function fetchExchangeRate() {
 }
 
 function fetchBTCPrice() {
-    // Try multiple APIs for redundancy
+    // Use CORS-friendly APIs
     var apis = [
-        'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true',
-        'https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT',
-        'https://blockchain.info/ticker'
+        'https://api.binance.com/api/v3/ticker/24hr?symbol=BTCUSDT',
+        'https://api.coinbase.com/v2/prices/BTC-USD/spot',
+        'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd'
     ];
     
     tryAPI(apis, 0);
@@ -218,20 +218,20 @@ function tryAPI(urls, idx) {
             var price = 0;
             var chg = 0;
             
-            // CoinGecko format
-            if (d && d.bitcoin && d.bitcoin.usd) {
-                price = d.bitcoin.usd;
-                chg = d.bitcoin.usd_24h_change || 0;
+            // Binance 24hr format
+            if (d && d.symbol === 'BTCUSDT') {
+                price = parseFloat(d.lastPrice);
+                chg = parseFloat(d.priceChangePercent);
             }
-            // Binance format
-            else if (d && d.symbol === 'BTCUSDT') {
-                price = parseFloat(d.price);
+            // Coinbase format
+            else if (d && d.data && d.data.amount) {
+                price = parseFloat(d.data.amount);
                 chg = 0;
             }
-            // Blockchain.info format
-            else if (d && d.USD && d.USD.last) {
-                price = d.USD.last;
-                chg = d.USD['24h_change'] || 0;
+            // CoinGecko format
+            else if (d && d.bitcoin && d.bitcoin.usd) {
+                price = d.bitcoin.usd;
+                chg = 0;
             }
             
             if (price > 0) {
