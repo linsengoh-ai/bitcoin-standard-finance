@@ -196,7 +196,8 @@ function fetchExchangeRate() {
 }
 
 function fetchBTCPrice() {
-    fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true')
+    // Use CORS proxy to fetch CoinGecko
+    fetch('https://api.allorigins.win/raw?url=' + encodeURIComponent('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true'))
         .then(function(r) { return r.json(); })
         .then(function(d) {
             btcPrice = d.bitcoin.usd;
@@ -210,7 +211,15 @@ function fetchBTCPrice() {
                 de.innerHTML = 'BTC ' + ar + Math.abs(chg).toFixed(1) + '% today <span style="color:var(--ts)">(' + (amt>=0?'+':'') + (exchangeRate[currency]===1?'BND ':'$') + Math.abs(amt).toFixed(0) + ')</span>';
             }
         })
-        .catch(function(e) { console.log(e); });
+        .catch(function(e) { 
+            console.log(e); 
+            // Fallback to cached price
+            var cached = JSON.parse(localStorage.getItem('btcPriceCache') || '{}');
+            if (cached.price) {
+                btcPrice = cached.price;
+                document.getElementById('btcPrice').textContent = '$' + btcPrice.toLocaleString() + ' (cached)';
+            }
+        });
 }
 
 function fetchBTCPriceHistory() {
