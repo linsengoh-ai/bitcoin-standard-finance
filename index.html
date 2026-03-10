@@ -199,18 +199,37 @@ function fetchBTCPrice() {
     fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true')
         .then(function(r) { return r.json(); })
         .then(function(d) {
-            btcPrice = d.bitcoin.usd;
-            document.getElementById('btcPrice').textContent = '$' + btcPrice.toLocaleString();
-            var chg = d.bitcoin.usd_24h_change;
-            var de = document.getElementById('btcDailyChange');
-            var bh = parseFloat(localStorage.getItem('btcHoldings') || '0');
-            if (chg !== undefined && bh > 0) {
-                var amt = btcPrice * toUsdRate * (chg/100) * bh * exchangeRate[currency];
-                var ar = chg >= 0 ? '↑' : '↓';
-                de.innerHTML = 'BTC ' + ar + Math.abs(chg).toFixed(1) + '% today <span style="color:var(--ts)">(' + (amt>=0?'+':'') + (exchangeRate[currency]===1?'BND ':'$') + Math.abs(amt).toFixed(0) + ')</span>';
+            if (d && d.bitcoin && d.bitcoin.usd) {
+                btcPrice = d.bitcoin.usd;
+                localStorage.setItem('btcPriceCache', JSON.stringify({price: btcPrice, timestamp: Date.now()}));
+                updateBTCDisplay(d.bitcoin.usd_24h_change);
+            } else {
+                useCachedPrice();
             }
         })
-        .catch(function(e) { console.log(e); });
+        .catch(function(e) { 
+            console.log('CoinGecko failed:', e);
+            useCachedPrice();
+        });
+}
+
+function useCachedPrice() {
+    var cached = JSON.parse(localStorage.getItem('btcPriceCache') || '{}');
+    if (cached.price) {
+        btcPrice = cached.price;
+        updateBTCDisplay(0);
+    }
+}
+
+function updateBTCDisplay(chg) {
+    document.getElementById('btcPrice').textContent = '$' + btcPrice.toLocaleString();
+    var de = document.getElementById('btcDailyChange');
+    var bh = parseFloat(localStorage.getItem('btcHoldings') || '0');
+    if (chg !== undefined && chg !== 0 && bh > 0) {
+        var amt = btcPrice * toUsdRate * (chg/100) * bh * exchangeRate[currency];
+        var ar = chg >= 0 ? '↑' : '↓';
+        de.innerHTML = 'BTC ' + ar + Math.abs(chg).toFixed(1) + '% today <span style="color:var(--ts)">(' + (amt>=0?'+':'') + (exchangeRate[currency]===1?'BND ':'$') + Math.abs(amt).toFixed(0) + ')</span>';
+    }
 }
 
 function fetchBTCPriceHistory() {
