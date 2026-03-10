@@ -735,7 +735,8 @@ function showTab(tab) {
             loadNetWorthChart();
             loadCategoryChart();
             renderRecurring();
-            updateStats();
+            // Use loadData to properly update all values including loan
+            loadData();
         }, 100);
     }
 }
