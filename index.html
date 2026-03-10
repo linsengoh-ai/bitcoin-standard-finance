@@ -198,37 +198,48 @@ function fetchExchangeRate() {
 function fetchBTCPrice() {
     document.getElementById('btcPrice').textContent = '$ loading...';
     
-    // Use Coinbase - most reliable
-    fetch('https://api.coinbase.com/v2/prices/BTC-USD/spot')
-        .then(function(r) { return r.json(); })
-        .then(function(d) {
-            if (d && d.data && d.data.amount) {
-                btcPrice = parseFloat(d.data.amount);
-                localStorage.setItem('btcPriceCache', JSON.stringify({price: btcPrice, timestamp: Date.now()}));
-                updateBTCDisplay(0);
-            } else {
-                useCachedPrice();
-            }
-        })
-        .catch(function(e) { 
-            console.log('Coinbase failed:', e);
-            // Try Binance as fallback
-            fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT')
-                .then(function(r) { return r.json(); })
-                .then(function(d) {
-                    if (d && d.price) {
-                        btcPrice = parseFloat(d.price);
-                        localStorage.setItem('btcPriceCache', JSON.stringify({price: btcPrice, timestamp: Date.now()}));
-                        updateBTCDisplay(0);
-                    } else {
-                        useCachedPrice();
-                    }
-                })
-                .catch(function(e2) {
-                    console.log('Binance also failed:', e2);
-                    useCachedPrice();
-                });
-        });
+    // Try multiple free APIs
+    var tried = 0;
+    
+    function tryNext() {
+        if (tried >= 3) {
+            useCachedPrice();
+            return;
+        }
+        
+        var url = tried === 0 ? 'https://api.coinbase.com/v2/prices/BTC-USD/spot' :
+                   tried === 1 ? 'https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT' :
+                   'https://blockchain.info/ticker';
+        
+        fetch(url)
+            .then(function(r) { return r.json(); })
+            .then(function(d) {
+                var price = 0;
+                if (tried === 0 && d && d.data && d.data.amount) {
+                    price = parseFloat(d.data.amount);
+                } else if (tried === 1 && d && d.price) {
+                    price = parseFloat(d.price);
+                } else if (tried === 2 && d && d.USD && d.USD.last) {
+                    price = d.USD.last;
+                }
+                
+                if (price > 0) {
+                    btcPrice = price;
+                    localStorage.setItem('btcPriceCache', JSON.stringify({price: btcPrice, timestamp: Date.now()}));
+                    updateBTCDisplay(0);
+                } else {
+                    tried++;
+                    tryNext();
+                }
+            })
+            .catch(function(e) {
+                console.log('API ' + tried + ' failed:', e);
+                tried++;
+                tryNext();
+            });
+    }
+    
+    tryNext();
 }
 
 function tryAPI(urls, idx) {
