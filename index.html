@@ -82,7 +82,7 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 <div class="ri" onclick="openLoanModal()"><div><span>⛓️</span><span class="lbl">Ledn Collateral</span></div><div style="text-align:right"><div class="val" id="loanBtcDisplay">₿ 0.00</div><div class="sub" id="ltvQuickDisplay">LTV 0%</div></div></div>
 <div class="ri" onclick="openTransferModal()"><div><span>🔄</span><span class="lbl">Transfer</span></div><div style="text-align:right"><div class="val" style="color:var(--ts)">Move money</div></div></div>
 <div class="st">Liabilities</div>
-<div class="ri" onclick="openLoanModal()"><div><span>💸</span><span class="lbl">Ledn Loan</span></div><div style="text-align:right"><div class="val" style="color:var(--red)" id="loanQuickDisplay">-BND 0</div></div></div>
+<div class="ri" onclick="openLoanModal()"><div><span>💸</span><span class="lbl">Bitcoin-backed Loan</span></div><div style="text-align:right"><div class="val" style="color:var(--red)" id="loanQuickDisplay">-BND 0</div></div></div>
 <div class="sr"><div class="sc"><div class="sl">Income</div><div class="sv g" id="monthlyIncome">$0</div></div><div class="sc"><div class="sl">Expenses</div><div class="sv r" id="monthlyExpenses">$0</div></div><div class="sc"><div class="sl">Net</div><div class="sv" id="monthlyNet">$0</div></div></div>
 <div class="st">Quick Add</div>
 <div class="qa"><button class="qb" onclick="openModal('expense','food')">🍔 Food</button><button class="qb" onclick="openModal('expense','transport')">🚗 Transport</button><button class="qb" onclick="openModal('expense','shopping')">🛍️ Shopping</button><button class="qb" onclick="openModal('expense','groceries')">🛒 Groceries</button><button class="qb" onclick="openModal('income','salary')">💰 Salary</button><button class="qb" onclick="showTab('stats')">📊</button></div>
@@ -107,9 +107,11 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 <div style="display:flex;justify-content:space-between;margin-bottom:12px"><span style="color:var(--ts)">Expenses</span><span id="expensesVsLast"><span style="color:var(--grn)">-</span></span></div>
 <div style="display:flex;justify-content:space-between"><span style="color:var(--ts)">Net Worth</span><span id="nwVsLast"><span style="color:var(--grn)">-</span></span></div>
 </div>
-<div class="st">Ledn</div>
+<div class="st">Bitcoin-backed Loans</div>
 <div class="nwc" style="text-align:left">
 <div style="display:flex;justify-content:space-between;margin-bottom:12px"><span style="color:var(--ts)">Collateral</span><span style="font-weight:600;color:var(--acc)" id="loanBtcDisplayStats">₿ 0.00</span></div>
+<div style="display:flex;justify-content:space-between;margin-bottom:12px"><span style="color:var(--ts)">Collateral Value</span><span style="font-weight:600" id="loanCollateralValueStats">$0</span></div>
+<div style="display:flex;justify-content:space-between;margin-bottom:12px"><span style="color:var(--ts)">Loan Amount</span><span style="font-weight:600;color:var(--red)" id="loanAmountStats">$0</span></div>
 <div style="display:flex;justify-content:space-between"><span style="color:var(--ts)">LTV</span><span id="ltvDisplayStats">0%</span></div>
 </div>
 <div class="st">Spending by Category</div>
@@ -470,7 +472,12 @@ function updateStats() {
         var cv = loan.btc * btcPrice * toUsdRate * rt;
         var ltv = cv > 0 ? (loan.amount / cv) * 100 : 0;
         document.getElementById('loanBtcDisplayStats').innerHTML = '₿ ' + loan.btc.toFixed(4);
+        document.getElementById('loanCollateralValueStats').textContent = sm + cv.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        document.getElementById('loanAmountStats').textContent = '-' + sm + (loan.amount * rt).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
         document.getElementById('ltvDisplayStats').textContent = ltv.toFixed(1) + '%';
+    } else {
+        document.getElementById('loanCollateralValueStats').textContent = sm + '0';
+        document.getElementById('loanAmountStats').textContent = '-' + sm + '0';
     }
 }
 
