@@ -265,6 +265,8 @@ function updateBTCDisplay(chg) {
         var ar = chg >= 0 ? '↑' : '↓';
         de.innerHTML = 'BTC ' + ar + Math.abs(chg).toFixed(1) + '% today <span style="color:var(--ts)">(' + (amt>=0?'+':'') + (exchangeRate[currency]===1?'BND ':'$') + Math.abs(amt).toFixed(0) + ')</span>';
     }
+    // Refresh calculations with new BTC price
+    loadData();
 }
 
 function fetchBTCPriceHistory() {
