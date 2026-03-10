@@ -1,129 +1,113 @@
-# Finance Tracker App - Research Report
-
-**Date:** March 10, 2026  
-**Purpose:** Personal finance app features analysis and improvement recommendations
-
----
-
-## Current App Overview
-
-Your finance tracker already includes:
-- Net worth tracking (multi-currency support with BND/BTC)
-- Asset management: Cash, Bank, BTC Ledger, Ledn Collateral
-- Liabilities tracking: Ledn Loan
-- Monthly income/expense tracking
-- Transaction logging with categories
-- Quick-add buttons for common transactions
-- Real-time BTC price display
-- Import/Export (JSON)
-- Clean dark-themed mobile UI
+# Personal Finance App Research Report
+**Date:** March 2026  
+**Purpose:** Identify opportunities to improve our finance tracker app
 
 ---
 
-## Industry Trends (2025-2026)
+## Market Overview
 
-### What's Driving the Market
-- **AI/ML Integration**: The biggest trend — apps now use AI for automatic categorization, predictive insights, and personalized financial advice
-- **Cleaner Dashboards**: Industry-wide shift toward less clutter, more intuitive navigation
-- **Automation**: Automatic transaction categorization, recurring payment detection, bill reminders
-- **Holistic Wealth View**: Combining budgeting with net-worth tracking and investing
-- **Real-time Sync**: Bank account aggregation via Plaid/MX APIs
-
-### Top Features Users Expect
-1. Automatic categorization (AI-powered)
-2. Budget creation and tracking
-3. Spending insights and trends
-4. Goal setting (savings, debt payoff)
-5. Bill reminders and due date tracking
-6. Investment portfolio view
-7. Credit score monitoring
-8. Financial forecasting
+The personal finance app market is growing at ~20% CAGR (2025-2035), currently valued at ~$3.45B, projected to hit $13.98B by 2035. Key drivers: digital adoption, demand for financial literacy, and AI innovation.
 
 ---
 
-## Recommended Improvements
+## Key Trends (2025-2026)
+
+### 1. AI-Powered Insights
+- **AI chatbots** (Cleo, Copilot Money) provide conversational spending advice
+- **Automated categorization** with smart pattern recognition
+- **Predictive analytics** — forecast cash flow, suggest budget adjustments
+- **Anomaly detection** — flag unusual spending in real-time
+
+### 2. Clean, Minimal UI
+- Industry trend toward cleaner dashboards, less clutter
+- Intuitive navigation to reduce friction for new users
+- Visual spending summaries with clear charts
+
+### 3. All-in-One Platforms
+- Budgeting + investing + net worth tracking (Copilot Money, Origin)
+- Bank syncing + credit score monitoring + identity protection
+- Shared household finance features (partners can collaborate)
+
+### 4. Automation-First Features
+- Auto-sweep savings, round-up investments
+- Recurring transaction handling
+- Bill tracking and reminders
+
+### 5. Wealth Management Integration
+- Wealth management segment projected to hold 35.8% market share by 2035
+- Investment portfolio tracking alongside expenses
+
+---
+
+## Top Competitors & What They Do Well
+
+| App | Strengths |
+|-----|-----------|
+| **YNAB** | Zero-based budgeting, educational approach, clean UI |
+| **Copilot Money** | Beautiful visualizations, AI-powered insights, all-in-one |
+| **Credit Karma** | 130M+ users, automatic bank sync, credit monitoring |
+| **PocketSmith** | Excellent forecasting, high customization |
+| ** Monarch** | Premium experience, investment + budgeting |
+
+---
+
+## Potential Improvements for Our Finance Tracker
 
 ### High Priority
 
-**1. Automatic Transaction Categorization**
-- AI learns from your manual categorizations
-- Detects patterns (Netflix → "Entertainment", Salary → "Income")
-- Reduces manual entry friction
+1. **AI-Powered Spending Insights**
+   - Add smart categorization that learns user behavior
+   - Implement conversational AI assistant for money questions
+   - Provide proactive alerts: "You usually spend $X on groceries, you've spent $Y this week"
 
-**2. Budget Limits & Alerts**
-- Set monthly limits per category
-- Push notifications when approaching/exceeding limits
-- Visual progress bars on spending
+2. **Bank Account Syncing**
+   - Essential feature competitors offer
+   - Auto-import transactions (reduces manual entry friction)
 
-**3. Spending Insights & Trends**
-- Weekly/monthly spending breakdowns (already have Chart.js)
-- Category pie charts, trend lines
-- "Your top spending categories this month" insights
+3. **Investment & Net Worth Tracking**
+   - Track investments alongside expenses
+   - Show complete financial picture (assets - liabilities = net worth)
 
-**4. Recurring Transaction Detection**
-- Auto-detect subscriptions (Netflix, gym, etc.)
-- Flag recurring payments
-- Option to mark as "recurring" for better forecasting
+4. **Shared / Household Mode**
+   - Allow partner collaboration on shared budgets
+   - Growing expectation for couples finance management
 
 ### Medium Priority
 
-**5. Financial Goals**
-- Savings goals (emergency fund, vacation, car)
-- Debt payoff plans (avalanche/snowball methods)
-- Progress visualization
+5. **Budget Forecasting**
+   - Project future balances based on recurring transactions
+   - Help users avoid surprises
 
-**6. Bill Reminders**
-- Due date tracking for loans, subscriptions
-- Notification before due dates
-- Calendar view of upcoming bills
+6. **Visual Analytics Overhaul**
+   - Beautiful, interactive charts (Copilot sets the bar high)
+   - Spending breakdowns by category, merchant, time period
 
-**7. Cash Flow Forecasting**
-- Predict next month's income/expenses based on history
-- "Based on your patterns, you'll have $X surplus next month"
-
-**8. Investment Portfolio Expansion**
-- Beyond BTC: track stocks, crypto across exchanges
-- Portfolio allocation pie chart
-- Total returns calculation
+7. **Automation Rules**
+   - Auto-save round-ups
+   - Auto-categorize recurring bills
+   - Custom rules for saving triggers
 
 ### Lower Priority (Nice to Have)
 
-**9. Credit Score Integration** (via Credit Karma / other APIs)
-**10. PDF Report Generation** for taxes/record-keeping
-**11. Cloud Backup** (iCloud, Google Drive)
-**12. Multi-user / Shared Accounts** for couples
-**13. Voice Input** for quick transaction entry
+8. **Credit Score Integration** (via Credit Karma or similar)
+9. **Bill Reminders & Due Date Tracking**
+10. **Export/Reports** for tax preparation
+11. **Dark Mode** & accessibility improvements
+12. **Offline Mode** with sync-on-connect
 
 ---
 
-## Competitive Analysis
+## Summary
 
-| App | Strength | Your Opportunity |
-|-----|----------|-------------------|
-| YNAB | Zero-based budgeting | Add budget envelopes feature |
-| Empower | Holistic net-worth + investing | Expand investment tracking |
-| PocketSmith | Forecasting | Add predictive cash flow |
-| Quicken | Full financial picture | Add bill management |
-| Piere | AI automation | Add smart categorization |
+The finance app space is moving fast toward **AI-first, all-in-one experiences**. Users expect:
 
----
+- **Less manual entry** (automation)
+- **More intelligence** (insights, predictions)
+- **Broader scope** (investments, net worth, household)
+- **Beautiful design** (clean, intuitive)
 
-## Technical Considerations
-
-- **Bank Sync**: Plaid API integration (requires backend, paid API)
-- **AI Categorization**: Can start with rule-based, upgrade to ML
-- **Data Storage**: LocalStorage → consider IndexedDB for larger datasets
-- **Charts**: Already using Chart.js — leverage for trends/insights
+Our best path: prioritize bank syncing + AI insights, then expand to investment/net worth tracking. These features align with where the market is heading and what users demand.
 
 ---
 
-## Suggested Next Steps
-
-1. **Add budget limits per category** — quick win, high value
-2. **Enhance charts** — spending trends, category breakdown
-3. **Auto-categorization** — start with keyword matching, learn over time
-4. **Goals tracking** — simple savings targets with progress
-
----
-
-*This report provides direction for evolving your finance tracker from a basic expense logger into a comprehensive personal finance hub.*
+*Sources: Forbes, PCMag, ZDNET, Bountisphere, Market Research Future, Precedence Research*

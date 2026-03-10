@@ -69,6 +69,32 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 .ti span{display:block;font-size:24px;margin-bottom:4px}
 .ti.act span{opacity:1}
 .hd{display:none}
+.ai-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:18px;margin-bottom:12px}
+.ai-card-header{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.ai-card-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px}
+.ai-card-title{font-size:14px;font-weight:600;color:var(--text)}
+.ai-card-value{font-size:24px;font-weight:700;margin-bottom:4px}
+.ai-card-sub{font-size:12px;color:var(--ts)}
+.ai-card.positive .ai-card-icon{background:rgba(48,209,88,0.15)}
+.ai-card.negative .ai-card-icon{background:rgba(255,69,58,0.15)}
+.ai-card.neutral .ai-card-icon{background:rgba(245,166,35,0.15)}
+.ai-card.info .ai-card-icon{background:rgba(0,122,255,0.15)}
+.ai-chat-msg{max-width:85%;padding:14px 16px;border-radius:18px;margin-bottom:12px;word-wrap:break-word}
+.ai-chat-user{background:linear-gradient(135deg,#f5a623,#ff7c00);color:#000;margin-left:auto;border-bottom-right-radius:4px}
+.ai-chat-ai{background:var(--card);border:1px solid var(--border);margin-right:auto;border-bottom-left-radius:4px}
+.ai-chat-time{font-size:10px;color:var(--ts);margin-top:4px}
+.alert-item{display:flex;align-items:flex-start;gap:12px;padding:14px;background:var(--card);border:1px solid var(--border);border-radius:14px;margin-bottom:8px}
+.alert-icon{width:32px;height:32px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.alert-warning{background:rgba(255,149,0,0.15)}
+.alert-danger{background:rgba(255,69,58,0.15)}
+.alert-success{background:rgba(48,209,88,0.15)}
+.alert-info{background:rgba(0,122,255,0.15)}
+.alert-content{flex:1}
+.alert-title{font-size:14px;font-weight:600;margin-bottom:2px}
+.alert-desc{font-size:13px;color:var(--ts)}
+.pattern-item{display:flex;justify-content:space-between;align-items:center;padding:14px;background:var(--card);border:1px solid var(--border);border-radius:14px;margin-bottom:8px}
+.pattern-label{font-size:14px;color:var(--text)}
+.pattern-value{font-size:14px;font-weight:600}
 </style>
 </head>
 <body>
@@ -137,6 +163,29 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 <div id="chartPlaceholder" style="text-align:center;color:var(--ts);padding:20px">Collecting data...</div>
 </div>
 </div>
+<div class="cnt hd" id="aiView" style="margin-bottom:100px">
+<div class="st">AI Insights</div>
+<div id="aiSummary"></div>
+<div class="st">Spending Patterns</div>
+<div id="aiPatterns"></div>
+<div class="st">Smart Alerts</div>
+<div id="aiAlerts"></div>
+<div class="st">Ask AI</div>
+<div id="aiChat" style="max-height:400px;overflow-y:auto;margin-bottom:16px"></div>
+<div style="display:flex;gap:10px">
+<input type="text" id="aiInput" placeholder="Ask about your spending..." style="flex:1;padding:16px 18px;background:var(--inp);border:1px solid var(--border);border-radius:14px;color:var(--text);font-size:15px" onkeypress="if(event.key==='Enter')askAI()">
+<button onclick="askAI()" style="padding:16px 24px;background:linear-gradient(135deg,#f5a623,#ff7c00);color:#000;border:none;border-radius:14px;font-size:15px;font-weight:600;cursor:pointer">Send</button>
+</div>
+<div style="margin-top:20px">
+<div style="color:var(--ts);font-size:12px;margin-bottom:10px">Quick questions:</div>
+<div style="display:flex;flex-wrap:wrap;gap:8px">
+<button class="qb" onclick="askAIQuick('spending')">How much did I spend this month?</button>
+<button class="qb" onclick="askAIQuick('category')">Biggest expense category?</button>
+<button class="qb" onclick="askAIQuick('trend')">Spending trend?</button>
+<button class="qb" onclick="askAIQuick('save')">How can I save more?</button>
+</div>
+</div>
+</div>
 <button class="fab" onclick="openModal()">+</button>
 <div class="mod" id="transactionModal">
 <div class="modc">
@@ -157,7 +206,7 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 <div class="mod" id="btcStandardModal"><div class="modc"><div class="modh"><div class="modt">Holdings</div><button class="modx" onclick="closeBtcStandardModal()">✕</button></div><div style="background:var(--inp);border-radius:16px;padding:20px;margin-bottom:16px"><div style="color:var(--ts);font-size:12px;margin-bottom:8px">FIAT</div><div style="font-size:28px;font-weight:700;color:var(--grn)" id="fiatHoldingsDisplay">BND 0</div></div><div style="background:var(--inp);border-radius:16px;padding:20px;margin-bottom:16px"><div style="color:var(--ts);font-size:12px;margin-bottom:8px">BTC</div><div style="font-size:28px;font-weight:700;color:var(--acc)" id="btcHoldingsDisplay">₿ 0.00</div><div style="font-size:14px;color:var(--ts);margin-top:4px" id="btcHoldingsValueDisplay">BND 0</div></div><div class="fg"><label>Cost Basis (total invested)</label><input type="number" id="costBasisInput" placeholder="0.00" step="0.01"><button class="sb" style="margin-top:8px" onclick="saveCostBasis()">Update</button></div></div></div>
 <div class="mod" id="transferModal"><div class="modc"><div class="modh"><div class="modt">Transfer</div><button class="modx" onclick="closeTransferModal()">✕</button></div><div class="fg"><label>From</label><select id="transferFrom"><option value="cash">Cash Balance</option><option value="bank">Bank Balance</option></select></div><div class="fg"><label>To</label><select id="transferTo"><option value="bank">Bank Balance</option><option value="cash">Cash Balance</option></select></div><div class="fg"><label>Amount (BND)</label><input type="number" id="transferAmount" placeholder="0.00" step="0.01"></div><button class="sb" onclick="saveTransfer()">Transfer</button></div></div></div>
 <div class="mod" id="recurringModal"><div class="modc"><div class="modh"><div class="modt">Add Recurring</div><button class="modx" onclick="closeRecurringModal()">✕</button></div><div class="fg"><label>Name</label><input type="text" id="recurringName" placeholder="Netflix, Rent, etc."></div><div class="fg"><label>Amount</label><input type="number" id="recurringAmount" placeholder="0.00" step="0.01"></div><div class="fg"><label>Category</label><select id="recurringCategory"><option value="food">🍔</option><option value="transport">🚗</option><option value="utilities">💡</option><option value="entertainment">🎬</option><option value="shopping">🛍️</option><option value="health">🏥</option><option value="groceries">🛒</option><option value="other">📦</option></select></div><div class="fg"><label>Frequency</label><select id="recurringFreq"><option value="weekly">Weekly</option><option value="monthly" selected>Monthly</option><option value="yearly">Yearly</option></select></div><div class="fg"><label>Next Due</label><input type="date" id="recurringDue"></div><button class="sb" onclick="saveRecurring()">Save</button></div></div>
-<div class="tb"><div class="ti act" id="tabFinance" onclick="showTab('finance')"><span>💳</span>Finance</div><div class="ti" id="tabAdd" onclick="showTab('add')"><span>➕</span>Add</div><div class="ti" id="tabStats" onclick="showTab('stats')"><span>📈</span>Stats</div></div>
+<div class="tb"><div class="ti act" id="tabFinance" onclick="showTab('finance')"><span>💳</span>Finance</div><div class="ti" id="tabAdd" onclick="showTab('add')"><span>➕</span>Add</div><div class="ti" id="tabStats" onclick="showTab('stats')"><span>📈</span>Stats</div><div class="ti" id="tabAI" onclick="showTab('ai')"><span>🤖</span>AI</div></div>
 <script>
 var btcPrice = 70800;
 var toUsdRate = 1.34;
@@ -1041,6 +1090,294 @@ function deleteRecurring(i) {
         });
     }
 })();
+
+// AI Spending Insights
+function generateAIInsights() {
+    var txs = JSON.parse(localStorage.getItem('transactions') || '[]');
+    var now = new Date();
+    var thisMonth = txs.filter(function(x) { return new Date(x.date) >= new Date(now.getFullYear(), now.getMonth(), 1); });
+    var lastMonth = txs.filter(function(x) { 
+        var d = new Date(x.date);
+        return d >= new Date(now.getFullYear(), now.getMonth() - 1, 1) && d < new Date(now.getFullYear(), now.getMonth(), 1);
+    });
+    
+    var rt = exchangeRate[currency] || 1;
+    var sm = currency === 'USD' ? '$' : 'BND ';
+    
+    // This month totals
+    var thisIncome = thisMonth.filter(function(x) { return x.type === 'income'; }).reduce(function(s, x) { return s + x.amount; }, 0) * rt;
+    var thisExpense = thisMonth.filter(function(x) { return x.type === 'expense'; }).reduce(function(s, x) { return s + x.amount; }, 0) * rt;
+    
+    // Last month totals
+    var lastIncome = lastMonth.filter(function(x) { return x.type === 'income'; }).reduce(function(s, x) { return s + x.amount; }, 0) * rt;
+    var lastExpense = lastMonth.filter(function(x) { return x.type === 'expense'; }).reduce(function(s, x) { return s + x.amount; }, 0) * rt;
+    
+    // Category breakdown
+    var categories = {};
+    thisMonth.filter(function(x) { return x.type === 'expense'; }).forEach(function(x) {
+        categories[x.category] = (categories[x.category] || 0) + x.amount * rt;
+    });
+    
+    // Find top category
+    var topCat = null;
+    var topCatAmount = 0;
+    for (var cat in categories) {
+        if (categories[cat] > topCatAmount) {
+            topCat = cat;
+            topCatAmount = categories[cat];
+        }
+    }
+    
+    // Generate summary
+    var summaryHtml = '';
+    var net = thisIncome - thisExpense;
+    summaryHtml += '<div class="ai-card neutral"><div class="ai-card-header"><div class="ai-card-icon">💰</div><div class="ai-card-title">This Month</div></div><div class="ai-card-value">' + sm + net.toFixed(0) + '</div><div class="ai-card-sub">Income: ' + sm + thisIncome.toFixed(0) + ' | Expenses: ' + sm + thisExpense.toFixed(0) + '</div></div>';
+    
+    if (lastExpense > 0) {
+        var change = ((thisExpense - lastExpense) / lastExpense) * 100;
+        var changeClass = change > 0 ? 'negative' : 'positive';
+        var changeIcon = change > 0 ? '📈' : '📉';
+        summaryHtml += '<div class="ai-card ' + changeClass + '"><div class="ai-card-header"><div class="ai-card-icon">' + changeIcon + '</div><div class="ai-card-title">vs Last Month</div></div><div class="ai-card-value">' + (change > 0 ? '+' : '') + change.toFixed(1) + '%</div><div class="ai-card-sub">' + sm + lastExpense.toFixed(0) + ' → ' + sm + thisExpense.toFixed(0) + '</div></div>';
+    }
+    
+    if (thisIncome > 0) {
+        var savingsRate = ((thisIncome - thisExpense) / thisIncome) * 100;
+        var srClass = savingsRate > 20 ? 'positive' : (savingsRate > 0 ? 'neutral' : 'negative');
+        summaryHtml += '<div class="ai-card ' + srClass + '"><div class="ai-card-header"><div class="ai-card-icon">🏦</div><div class="ai-card-title">Savings Rate</div></div><div class="ai-card-value">' + savingsRate.toFixed(1) + '%</div><div class="ai-card-sub">' + (savingsRate > 20 ? 'Great job!' : savingsRate > 0 ? 'Room for improvement' : 'Spent more than earned') + '</div></div>';
+    }
+    
+    document.getElementById('aiSummary').innerHTML = summaryHtml;
+    
+    // Patterns
+    var patternsHtml = '';
+    if (topCat) {
+        patternsHtml += '<div class="pattern-item"><span class="pattern-label">Top expense</span><span class="pattern-value">' + ci[topCat] + ' ' + cn[topCat] + ' (' + sm + topCatAmount.toFixed(0) + ')</span></div>';
+    }
+    
+    // Average daily spend
+    var daysInMonth = now.getDate();
+    var dailyAvg = thisExpense / daysInMonth;
+    patternsHtml += '<div class="pattern-item"><span class="pattern-label">Daily average</span><span class="pattern-value">' + sm + dailyAvg.toFixed(0) + '</span></div>';
+    
+    // Transaction count
+    patternsHtml += '<div class="pattern-item"><span class="pattern-label">Transactions</span><span class="pattern-value">' + thisMonth.length + ' this month</span></div>';
+    
+    document.getElementById('aiPatterns').innerHTML = patternsHtml;
+    
+    // Alerts
+    var alertsHtml = '';
+    
+    // Check for unusual spending
+    if (lastExpense > 0 && thisExpense > lastExpense * 1.3) {
+        alertsHtml += '<div class="alert-item"><div class="alert-icon alert-warning">⚠️</div><div class="alert-content"><div class="alert-title">Spending up 30%+</div><div class="alert-desc">Your expenses are significantly higher than last month. Review your recent transactions.</div></div></div>';
+    }
+    
+    // Check for high category
+    if (topCatAmount > thisExpense * 0.4) {
+        alertsHtml += '<div class="alert-item"><div class="alert-icon alert-info">💡</div><div class="alert-content"><div class="alert-title">' + cn[topCat] + ' is ' + Math.round(topCatAmount / thisExpense * 100) + '% of spending</div><div class="alert-desc">This category is your biggest expense. Consider ways to reduce costs here.</div></div></div>';
+    }
+    
+    // Check for savings
+    if (thisIncome > thisExpense) {
+        alertsHtml += '<div class="alert-item"><div class="alert-icon alert-success">✅</div><div class="alert-content"><div class="alert-title">You\'re saving money!</div><div class="alert-desc">Great job! You\'ve saved ' + sm + (thisIncome - thisExpense).toFixed(0) + ' this month.</div></div></div>';
+    }
+    
+    // Check for low transaction count (might indicate missing entries)
+    if (thisMonth.length < 3 && daysInMonth > 10) {
+        alertsHtml += '<div class="alert-item"><div class="alert-icon alert-info">📝</div><div class="alert-content"><div class="alert-title">Low activity detected</div><div class="alert-desc">Only ' + thisMonth.length + ' transactions this month. Have you recorded everything?</div></div></div>';
+    }
+    
+    if (alertsHtml === '') {
+        alertsHtml = '<div class="alert-item"><div class="alert-icon alert-success">✨</div><div class="alert-content"><div class="alert-title">All looks good!</div><div class="alert-desc">No spending alerts at this time.</div></div></div>';
+    }
+    
+    document.getElementById('aiAlerts').innerHTML = alertsHtml;
+}
+
+function askAIQuick(type) {
+    var q = '';
+    switch(type) {
+        case 'spending': q = 'How much did I spend this month?'; break;
+        case 'category': q = 'What is my biggest expense category?'; break;
+        case 'trend': q = 'How is my spending trending?'; break;
+        case 'save': q = 'How can I save more money?'; break;
+    }
+    if (q) {
+        document.getElementById('aiInput').value = q;
+        askAI();
+    }
+}
+
+function askAI() {
+    var input = document.getElementById('aiInput');
+    var question = input.value.trim();
+    if (!question) return;
+    
+    var chat = document.getElementById('aiChat');
+    var now = new Date();
+    var timeStr = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+    
+    // Add user message
+    chat.innerHTML += '<div class="ai-chat-msg ai-chat-user">' + question + '<div class="ai-chat-time">' + timeStr + '</div></div>';
+    
+    // Generate response
+    var response = generateAIResponse(question);
+    
+    // Add AI response
+    var aiNow = new Date();
+    chat.innerHTML += '<div class="ai-chat-msg ai-chat-ai">' + response + '<div class="ai-chat-time">' + aiNow.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) + '</div></div>';
+    
+    chat.scrollTop = chat.scrollHeight;
+    input.value = '';
+}
+
+function generateAIResponse(question) {
+    var txs = JSON.parse(localStorage.getItem('transactions') || '[]');
+    var now = new Date();
+    var rt = exchangeRate[currency] || 1;
+    var sm = currency === 'USD' ? '$' : 'BND ';
+    
+    var thisMonth = txs.filter(function(x) { return new Date(x.date) >= new Date(now.getFullYear(), now.getMonth(), 1); });
+    var lastMonth = txs.filter(function(x) { 
+        var d = new Date(x.date);
+        return d >= new Date(now.getFullYear(), now.getMonth() - 1, 1) && d < new Date(now.getFullYear(), now.getMonth(), 1);
+    });
+    
+    var q = question.toLowerCase();
+    
+    // Spending amounts
+    if (q.includes('spend') || q.includes('spent') || q.includes('total') || q.includes('how much')) {
+        var thisExp = thisMonth.filter(function(x) { return x.type === 'expense'; }).reduce(function(s, x) { return s + x.amount; }, 0) * rt;
+        var lastExp = lastMonth.filter(function(x) { return x.type === 'expense'; }).reduce(function(s, x) { return s + x.amount; }, 0) * rt;
+        
+        if (thisExp > 0 && lastExp > 0) {
+            var change = ((thisExp - lastExp) / lastExp * 100).toFixed(0);
+            return 'This month you\'ve spent <strong>' + sm + thisExp.toFixed(0) + '</strong>. ' + (change > 0 ? 'That\'s ' + change + '% more than last month.' : 'That\'s ' + Math.abs(change) + '% less than last month.');
+        } else if (thisExp > 0) {
+            return 'This month you\'ve spent <strong>' + sm + thisExp.toFixed(0) + '</strong> so far.';
+        }
+        return 'No expenses recorded this month yet.';
+    }
+    
+    // Category breakdown
+    if (q.includes('category') || q.includes('biggest') || q.includes('most') || q.includes('where')) {
+        var categories = {};
+        thisMonth.filter(function(x) { return x.type === 'expense'; }).forEach(function(x) {
+            categories[x.category] = (categories[x.category] || 0) + x.amount * rt;
+        });
+        
+        var sorted = Object.entries(categories).sort(function(a, b) { return b[1] - a[1]; });
+        
+        if (sorted.length === 0) {
+            return 'No expenses recorded yet.';
+        }
+        
+        var top = sorted[0];
+        var total = Object.values(categories).reduce(function(a, b) { return a + b; }, 0);
+        var pct = Math.round(top[1] / total * 100);
+        
+        var response = 'Your biggest expense is <strong>' + ci[top[0]] + ' ' + cn[top[0]] + '</strong> at ' + sm + top[1].toFixed(0) + ' (' + pct + '% of spending).';
+        
+        if (sorted.length > 1) {
+            response += '<br><br>Other categories:';
+            sorted.slice(1, 4).forEach(function(c) {
+                response += '<br>• ' + ci[c[0]] + ' ' + cn[c[0]] + ': ' + sm + c[1].toFixed(0);
+            });
+        }
+        return response;
+    }
+    
+    // Trend
+    if (q.includes('trend') || q.includes('increasing') || q.includes('decreasing') || q.includes('compared')) {
+        var thisExp = thisMonth.filter(function(x) { return x.type === 'expense'; }).reduce(function(s, x) { return s + x.amount; }, 0) * rt;
+        var lastExp = lastMonth.filter(function(x) { return x.type === 'expense'; }).reduce(function(s, x) { return s + x.amount; }, 0) * rt;
+        
+        if (thisExp === 0 && lastExp === 0) {
+            return 'Not enough data to determine a trend. Keep tracking your expenses!';
+        } else if (thisExp > lastExp * 1.2) {
+            return '📈 Your spending is <strong>increasing</strong>. You spent ' + sm + (thisExp - lastExp).toFixed(0) + ' more this month vs last. Consider reviewing your recent purchases.';
+        } else if (thisExp < lastExp * 0.8) {
+            return '📉 Your spending is <strong>decreasing</strong> — great job! You spent ' + sm + (lastExp - thisExp).toFixed(0) + ' less than last month.';
+        }
+        return 'Your spending is <strong>stable</strong> — roughly the same as last month.';
+    }
+    
+    // Savings
+    if (q.includes('save') || q.includes('save') || q.includes('budget') || q.includes('reduce')) {
+        var income = thisMonth.filter(function(x) { return x.type === 'income'; }).reduce(function(s, x) { return s + x.amount; }, 0) * rt;
+        var expense = thisMonth.filter(function(x) { return x.type === 'expense'; }).reduce(function(s, x) { return s + x.amount; }, 0) * rt;
+        
+        if (income === 0) {
+            return 'Add your income to get personalized saving tips!';
+        }
+        
+        var savings = income - expense;
+        var rate = (savings / income * 100).toFixed(0);
+        
+        var tips = [];
+        
+        // Find top category
+        var categories = {};
+        thisMonth.filter(function(x) { return x.type === 'expense'; }).forEach(function(x) {
+            categories[x.category] = (categories[x.category] || 0) + x.amount * rt;
+        });
+        var top = Object.entries(categories).sort(function(a, b) { return b[1] - a[1]; })[0];
+        
+        if (top) {
+            tips.push('Your top expense (' + cn[top[0]] + ') is ' + sm + top[1].toFixed(0) + '. Look for ways to reduce it.');
+        }
+        
+        if (savings < 0) {
+            tips.push('You\'re overspending by ' + sm + Math.abs(savings).toFixed(0) + '. Try the 50/30/20 rule: 50% needs, 30% wants, 20% savings.');
+        } else if (rate < 20) {
+            tips.push('Your savings rate is ' + rate + '%. Try to hit 20% — automate transfers to savings right when you get paid.');
+        } else {
+            tips.push('Excellent! ' + rate + '% savings rate. Consider investing your savings for compound growth.');
+        }
+        
+        return tips.join('<br><br>');
+    }
+    
+    // Income
+    if (q.includes('income') || q.includes('earn') || q.includes('salary')) {
+        var income = thisMonth.filter(function(x) { return x.type === 'income'; }).reduce(function(s, x) { return s + x.amount; }, 0) * rt;
+        if (income > 0) {
+            return 'Your income this month: <strong>' + sm + income.toFixed(0) + '</strong>';
+        }
+        return 'No income recorded this month.';
+    }
+    
+    // Help
+    if (q.includes('help') || q.includes('what')) {
+        return 'Ask me about:<br>• How much you spent<br>• Your biggest expense category<br>• Your spending trend<br>• How to save more<br>• Your income';
+    }
+    
+    return 'I\'m still learning! Try asking: "How much did I spend?", "What\'s my biggest expense?", or "How can I save more?"';
+}
+
+function showTab(tab) {
+    document.getElementById('financeView').classList.add('hd');
+    document.getElementById('statsView').classList.add('hd');
+    document.getElementById('aiView').classList.add('hd');
+    document.getElementById('tabFinance').classList.remove('act');
+    document.getElementById('tabStats').classList.remove('act');
+    document.getElementById('tabAI').classList.remove('act');
+    document.getElementById('tabAdd').classList.remove('act');
+    
+    if (tab === 'finance') {
+        document.getElementById('financeView').classList.remove('hd');
+        document.getElementById('tabFinance').classList.add('act');
+    } else if (tab === 'stats') {
+        document.getElementById('statsView').classList.remove('hd');
+        document.getElementById('tabStats').classList.add('act');
+    } else if (tab === 'ai') {
+        document.getElementById('aiView').classList.remove('hd');
+        document.getElementById('tabAI').classList.add('act');
+        generateAIInsights();
+    } else if (tab === 'add') {
+        openModal();
+    }
+}
 
 init();
 </script>
