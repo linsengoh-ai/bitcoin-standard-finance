@@ -196,14 +196,22 @@ function fetchExchangeRate() {
 }
 
 function fetchBTCPrice() {
-    // Use CORS-friendly APIs
-    var apis = [
-        'https://api.binance.com/api/v3/ticker/24hr?symbol=BTCUSDT',
-        'https://api.coinbase.com/v2/prices/BTC-USD/spot',
-        'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd'
-    ];
-    
-    tryAPI(apis, 0);
+    // Use Coinbase - most reliable
+    fetch('https://api.coinbase.com/v2/prices/BTC-USD/spot')
+        .then(function(r) { return r.json(); })
+        .then(function(d) {
+            if (d && d.data && d.data.amount) {
+                btcPrice = parseFloat(d.data.amount);
+                localStorage.setItem('btcPriceCache', JSON.stringify({price: btcPrice, timestamp: Date.now()}));
+                updateBTCDisplay(0);
+            } else {
+                useCachedPrice();
+            }
+        })
+        .catch(function(e) { 
+            console.log('Coinbase failed:', e);
+            useCachedPrice();
+        });
 }
 
 function tryAPI(urls, idx) {
