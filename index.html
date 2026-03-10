@@ -196,19 +196,28 @@ function fetchExchangeRate() {
 }
 
 function fetchBTCPrice() {
-    // Use Binance API - free, no auth, works from browser
-    fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT')
+    // Use Binance 24hr ticker - gives price + 24h change
+    fetch('https://api.binance.com/api/v3/ticker/24hr?symbol=BTCUSDT')
         .then(function(r) { return r.json(); })
         .then(function(d) {
-            if (d && d.price) {
-                btcPrice = parseFloat(d.price);
+            if (d && d.lastPrice) {
+                btcPrice = parseFloat(d.lastPrice);
+                var chg = parseFloat(d.priceChangePercent);
                 document.getElementById('btcPrice').textContent = '$' + btcPrice.toLocaleString();
                 localStorage.setItem('btcPriceCache', JSON.stringify({price: btcPrice, timestamp: Date.now()}));
+                
+                // Show daily change
+                var de = document.getElementById('btcDailyChange');
+                var bh = parseFloat(localStorage.getItem('btcHoldings') || '0');
+                if (chg !== undefined && !isNaN(chg) && bh > 0) {
+                    var amt = btcPrice * toUsdRate * (chg/100) * bh * exchangeRate[currency];
+                    var ar = chg >= 0 ? '↑' : '↓';
+                    de.innerHTML = 'BTC ' + ar + Math.abs(chg).toFixed(1) + '% today <span style="color:var(--ts)">(' + (amt>=0?'+':'') + (exchangeRate[currency]===1?'BND ':'$') + Math.abs(amt).toFixed(0) + ')</span>';
+                }
             }
         })
         .catch(function(e) { 
             console.log(e); 
-            // Fallback to cached
             var cached = JSON.parse(localStorage.getItem('btcPriceCache') || '{}');
             if (cached.price) {
                 btcPrice = cached.price;
