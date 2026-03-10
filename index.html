@@ -196,6 +196,8 @@ function fetchExchangeRate() {
 }
 
 function fetchBTCPrice() {
+    document.getElementById('btcPrice').textContent = '$ loading...';
+    
     // Use Coinbase - most reliable
     fetch('https://api.coinbase.com/v2/prices/BTC-USD/spot')
         .then(function(r) { return r.json(); })
@@ -210,7 +212,22 @@ function fetchBTCPrice() {
         })
         .catch(function(e) { 
             console.log('Coinbase failed:', e);
-            useCachedPrice();
+            // Try Binance as fallback
+            fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT')
+                .then(function(r) { return r.json(); })
+                .then(function(d) {
+                    if (d && d.price) {
+                        btcPrice = parseFloat(d.price);
+                        localStorage.setItem('btcPriceCache', JSON.stringify({price: btcPrice, timestamp: Date.now()}));
+                        updateBTCDisplay(0);
+                    } else {
+                        useCachedPrice();
+                    }
+                })
+                .catch(function(e2) {
+                    console.log('Binance also failed:', e2);
+                    useCachedPrice();
+                });
         });
 }
 
