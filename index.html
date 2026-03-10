@@ -196,20 +196,55 @@ function fetchExchangeRate() {
 }
 
 function fetchBTCPrice() {
-    fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true')
+    // Try multiple APIs for redundancy
+    var apis = [
+        'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true',
+        'https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT',
+        'https://blockchain.info/ticker'
+    ];
+    
+    tryAPI(apis, 0);
+}
+
+function tryAPI(urls, idx) {
+    if (idx >= urls.length) {
+        useCachedPrice();
+        return;
+    }
+    
+    fetch(urls[idx])
         .then(function(r) { return r.json(); })
         .then(function(d) {
+            var price = 0;
+            var chg = 0;
+            
+            // CoinGecko format
             if (d && d.bitcoin && d.bitcoin.usd) {
-                btcPrice = d.bitcoin.usd;
+                price = d.bitcoin.usd;
+                chg = d.bitcoin.usd_24h_change || 0;
+            }
+            // Binance format
+            else if (d && d.symbol === 'BTCUSDT') {
+                price = parseFloat(d.price);
+                chg = 0;
+            }
+            // Blockchain.info format
+            else if (d && d.USD && d.USD.last) {
+                price = d.USD.last;
+                chg = d.USD['24h_change'] || 0;
+            }
+            
+            if (price > 0) {
+                btcPrice = price;
                 localStorage.setItem('btcPriceCache', JSON.stringify({price: btcPrice, timestamp: Date.now()}));
-                updateBTCDisplay(d.bitcoin.usd_24h_change);
+                updateBTCDisplay(chg);
             } else {
-                useCachedPrice();
+                tryAPI(urls, idx + 1);
             }
         })
         .catch(function(e) { 
-            console.log('CoinGecko failed:', e);
-            useCachedPrice();
+            console.log('API ' + idx + ' failed:', e);
+            tryAPI(urls, idx + 1);
         });
 }
 
