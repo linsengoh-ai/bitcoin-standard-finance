@@ -854,7 +854,7 @@ function loadCategoryChart() {
     document.getElementById('categoryChart').style.display = 'block';
     var colors = ['#f7931a', '#30d158', '#ff453a', '#0a84ff', '#bf5af2', '#ff9f0a', '#64d2ff', '#ffd60a'];
     var total = data.reduce(function(a, b) { return a + b; }, 0);
-    var labelsWithPct = labels.map(function(l, i) { return l + ' (' + ((data[i] / total) * 100).toFixed(1) + '%)'; });
+    var labelsWithAmount = labels.map(function(l, i) { return l + ': $' + data[i].toFixed(0) + ' (' + ((data[i] / total) * 100).toFixed(1) + '%)'; });
     var ctx = document.getElementById('categoryChart').getContext('2d');
     if (categoryChart && typeof categoryChart.destroy === 'function') {
         categoryChart.destroy();
@@ -862,7 +862,7 @@ function loadCategoryChart() {
     categoryChart = new Chart(ctx, {
         type: 'doughnut',
         data: {
-            labels: labelsWithPct,
+            labels: labelsWithAmount,
             datasets: [{
                 data: data,
                 backgroundColor: colors.slice(0, data.length),
