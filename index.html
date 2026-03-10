@@ -72,7 +72,7 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 </style>
 </head>
 <body>
-<div class="hdr"><div><h1>StackSats</h1><span id="cdate"></span></div><div style="display:flex;align-items:center;gap:8px"><button onclick="exportData()" style="background:none;border:none;color:var(--ts);font-size:12px;cursor:pointer">💾</button><input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(this.files[0])"><button onclick="document.getElementById('importFile').click()" style="background:none;border:none;color:var(--ts);font-size:12px;cursor:pointer">📂</button><span>₿ <span id="btcPrice">$69,972</span></span></div></div>
+<div class="hdr"><div><h1>StackSats</h1><span id="cdate"></span></div><div style="display:flex;align-items:center;gap:8px"><button onclick="exportData()" style="background:none;border:none;color:var(--ts);font-size:12px;cursor:pointer">💾</button><input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(this.files[0])"><button onclick="document.getElementById('importFile').click()" style="background:none;border:none;color:var(--ts);font-size:12px;cursor:pointer">📂</button><span>₿ <span id="btcPrice">$70,800</span></span></div></div>
 <div class="cnt" id="financeView">
 <div class="nwc"><div class="nwl">Net Worth</div><div class="nwa" id="totalNetWorth" onclick="toggleCurrency()">$0</div><div id="btcDailyChange"></div></div>
 <div class="st">Assets</div>
@@ -157,7 +157,7 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 <div class="mod" id="recurringModal"><div class="modc"><div class="modh"><div class="modt">Add Recurring</div><button class="modx" onclick="closeRecurringModal()">✕</button></div><div class="fg"><label>Name</label><input type="text" id="recurringName" placeholder="Netflix, Rent, etc."></div><div class="fg"><label>Amount</label><input type="number" id="recurringAmount" placeholder="0.00" step="0.01"></div><div class="fg"><label>Category</label><select id="recurringCategory"><option value="food">🍔</option><option value="transport">🚗</option><option value="utilities">💡</option><option value="entertainment">🎬</option><option value="shopping">🛍️</option><option value="health">🏥</option><option value="groceries">🛒</option><option value="other">📦</option></select></div><div class="fg"><label>Frequency</label><select id="recurringFreq"><option value="weekly">Weekly</option><option value="monthly" selected>Monthly</option><option value="yearly">Yearly</option></select></div><div class="fg"><label>Next Due</label><input type="date" id="recurringDue"></div><button class="sb" onclick="saveRecurring()">Save</button></div></div>
 <div class="tb"><div class="ti act" id="tabFinance" onclick="showTab('finance')"><span>💳</span>Finance</div><div class="ti" id="tabAdd" onclick="showTab('add')"><span>➕</span>Add</div><div class="ti" id="tabStats" onclick="showTab('stats')"><span>📈</span>Stats</div></div>
 <script>
-var btcPrice = 69972;
+var btcPrice = 70800;
 var toUsdRate = 1.34;
 var exchangeRate = {USD: 1/toUsdRate, BND: 1};
 var currency = localStorage.getItem('currency') || 'BND';
