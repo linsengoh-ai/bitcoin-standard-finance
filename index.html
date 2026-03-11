@@ -237,6 +237,7 @@ function init() {
     var cached = JSON.parse(localStorage.getItem('btcPriceCache') || '{}');
     if (cached.price) {
         btcPrice = cached.price;
+        document.getElementById('btcPrice').textContent = '$' + btcPrice.toLocaleString();
     }
     loadData();
     fetchExchangeRate();
