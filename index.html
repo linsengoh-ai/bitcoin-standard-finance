@@ -107,7 +107,7 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 </style>
 </head>
 <body>
-<div class="hdr"><div><h1>StackSats</h1><span id="cdate"></span></div><div style="display:flex;align-items:center;gap:8px"><button onclick="exportData()" style="background:none;border:none;color:var(--ts);font-size:12px;cursor:pointer">💾</button><input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(this.files[0])"><button onclick="document.getElementById('importFile').click()" style="background:none;border:none;color:var(--ts);font-size:12px;cursor:pointer">📂</button><span>₿ <span id="btcPrice">$70,800</span></span></div></div>
+<div class="hdr"><div><h1>StackSats</h1><span id="cdate"></span></div><div style="display:flex;align-items:center;gap:8px"><button onclick="exportData()" style="background:none;border:none;color:var(--ts);font-size:12px;cursor:pointer">💾</button><input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(this.files[0])"><button onclick="document.getElementById('importFile').click()" style="background:none;border:none;color:var(--ts);font-size:12px;cursor:pointer">📂</button><span style="cursor:pointer" onclick="fetchBTCPrice()" title="Click to refresh">₿ <span id="btcPrice">$70,800</span></span></div></div>
 <div class="cnt" id="financeView">
 <div class="nwc"><div class="nwl">Net Worth</div><div class="nwa" id="totalNetWorth" onclick="toggleCurrency()">$0</div><div id="btcDailyChange"></div></div>
 <div class="st">Assets</div>
@@ -203,7 +203,7 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 <div class="modh"><div class="modt">Add Transaction</div><button class="modx" onclick="closeModal()">✕</button></div>
 <div class="tt"><button class="act" id="typeExpense" onclick="setType('expense')">Expense</button><button id="typeIncome" onclick="setType('income')">Income</button></div>
 <div class="fg"><label>Amount</label><input type="number" id="txAmount" placeholder="0.00" step="0.01"></div>
-<div class="fg"><label>Pay From</label><select id="txSource"><option value="cash">Cash Balance</option><option value="bank">Bank Balance</option></select></div>
+<div class="fg"><label id="payLabel">Pay From</label><select id="txSource"><option value="cash">Cash Balance</option><option value="bank">Bank Balance</option></select></div>
 <div class="fg"><label>Category</label><select id="txCategory"><optgroup label="Income"><option value="salary">💰 Salary</option><option value="investment">📈 Investment</option><option value="freelance">💻 Freelance</option><option value="other-income">📦 Other</option></optgroup><optgroup label="Expenses"><option value="food">🍔 Food</option><option value="transport">🚗 Transport</option><option value="utilities">💡 Utilities</option><option value="entertainment">🎬 Entertainment</option><option value="shopping">🛍️ Shopping</option><option value="health">🏥 Health</option><option value="groceries">🛒 Groceries</option><option value="other">📦 Other</option></optgroup></select></div>
 <div class="fg"><label>Description</label><input type="text" id="txDesc" placeholder="What's this for?"></div>
 <div class="fg"><label>Date</label><input type="date" id="txDate"></div>
@@ -265,41 +265,48 @@ function fetchExchangeRate() {
 }
 
 function fetchBTCPrice() {
-    // Use Coinbase - reliable, CORS supported
-    fetch('https://api.coinbase.com/v2/prices/BTC-USD/spot')
-        .then(function(r) { return r.json(); })
-        .then(function(d) {
-            if (d && d.data && d.data.amount) {
-                btcPrice = parseFloat(d.data.amount);
-                document.getElementById('btcPrice').textContent = '$' + btcPrice.toLocaleString();
-                localStorage.setItem('btcPriceCache', JSON.stringify({price: btcPrice, timestamp: Date.now()}));
-                loadData(); // Refresh calculations
+    // Use multiple sources for reliability
+    var sources = [
+        {url: 'https://api.coinbase.com/v2/prices/BTC-USD/spot', parser: function(d) { return d && d.data && d.data.amount ? parseFloat(d.data.amount) : null; }},
+        {url: 'https://api.binance.com/api/v3/ticker/24hr?symbol=BTCUSDT', parser: function(d) { return d && d.lastPrice ? parseFloat(d.lastPrice) : null; }},
+        {url: 'https://api.kraken.com/0/public/Ticker?pair=XBTUSD', parser: function(d) { return d && d.result && d.result.XXBTZUSD && d.result.XXBTZUSD.c ? parseFloat(d.result.XXBTZUSD.c[0]) : null; }}
+    ];
+    
+    var trySource = function(index) {
+        if (index >= sources.length) {
+            // All sources failed, use cached
+            var cached = JSON.parse(localStorage.getItem('btcPriceCache') || '{}');
+            if (cached.price) {
+                btcPrice = cached.price;
+                document.getElementById('btcPrice').textContent = '$' + btcPrice.toLocaleString() + ' (cached)';
+                loadData();
             }
-        })
-        .catch(function(e) { 
-            console.log('Coinbase error:', e);
-            // Try Binance fallback
-            fetch('https://api.binance.com/api/v3/ticker/24hr?symbol=BTCUSDT')
-                .then(function(r) { return r.json(); })
-                .then(function(d) {
-                    if (d && d.lastPrice) {
-                        btcPrice = parseFloat(d.lastPrice);
-                        document.getElementById('btcPrice').textContent = '$' + btcPrice.toLocaleString();
-                        localStorage.setItem('btcPriceCache', JSON.stringify({price: btcPrice, timestamp: Date.now()}));
-                        loadData();
-                    }
-                })
-                .catch(function(e2) {
-                    console.log('Binance error:', e2);
-                    // Use cached
-                    var cached = JSON.parse(localStorage.getItem('btcPriceCache') || '{}');
-                    if (cached.price) {
-                        btcPrice = cached.price;
-                        document.getElementById('btcPrice').textContent = '$' + btcPrice.toLocaleString() + ' (cached)';
-                        loadData();
-                    }
-                });
-        });
+            return;
+        }
+        
+        fetch(sources[index].url)
+            .then(function(r) { return r.json(); })
+            .then(function(d) {
+                var price = sources[index].parser(d);
+                if (price && price > 0) {
+                    btcPrice = price;
+                    document.getElementById('btcPrice').textContent = '$' + btcPrice.toLocaleString();
+                    localStorage.setItem('btcPriceCache', JSON.stringify({price: btcPrice, timestamp: Date.now()}));
+                    loadData();
+                } else {
+                    trySource(index + 1);
+                }
+            })
+            .catch(function(e) {
+                console.log('Price source ' + index + ' error:', e);
+                trySource(index + 1);
+            });
+    };
+    
+    trySource(0);
+    
+    // Refresh price every 60 seconds
+    setTimeout(fetchBTCPrice, 60000);
 }
 
 function fetchBTCPriceHistory() {
@@ -586,6 +593,7 @@ function setType(t) {
     currentType = t;
     document.getElementById('typeExpense').className = t === 'expense' ? 'act' : '';
     document.getElementById('typeIncome').className = t === 'income' ? 'act' : '';
+    document.getElementById('payLabel').textContent = t === 'income' ? 'Pay To' : 'Pay From';
 }
 
 function saveTransaction() {
