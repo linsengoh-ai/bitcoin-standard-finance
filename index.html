@@ -549,6 +549,7 @@ function updateStats() {
             '<div class="ltv-marker danger" title="80% Liquidation"></div>' +
             '</div>';
     } else {
+        document.getElementById('loanBtcDisplayStats').innerHTML = '₿ 0.00';
         document.getElementById('loanCollateralValueStats').textContent = sm + '0';
         document.getElementById('loanAmountStats').textContent = '-' + sm + '0';
         document.getElementById('ltvGaugeContainer').innerHTML = '<div style="text-align:center;color:var(--ts);padding:20px">No loan active</div>';
@@ -809,38 +810,7 @@ function showTab(tab) {
             loadNetWorthChart();
             loadCategoryChart();
             renderRecurring();
-            // Update loan values for stats view
-            var loan = JSON.parse(localStorage.getItem('loan') || '{"amount":0,"btc":0}');
-            var rt = exchangeRate[currency];
-            var sm = currency === 'USD' ? '$' : 'BND ';
-            if (loan.btc > 0 && btcPrice > 0) {
-                var cv = loan.btc * btcPrice * toUsdRate * rt;
-                var ltv = cv > 0 ? (loan.amount / cv) * 100 : 0;
-                document.getElementById('loanBtcDisplayStats').innerHTML = '₿ ' + loan.btc.toFixed(4);
-                document.getElementById('loanCollateralValueStats').textContent = sm + cv.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-                document.getElementById('loanAmountStats').textContent = '-' + sm + (loan.amount * rt).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-                
-                // Render LTV gauge
-                var gaugeContainer = document.getElementById('ltvGaugeContainer');
-                var ltvClamped = Math.min(ltv, 100);
-                var statusClass = ltv >= 80 ? 'danger' : (ltv >= 70 ? 'warning' : 'safe');
-                var statusText = ltv >= 80 ? 'LIQUIDATION RISK!' : (ltv >= 70 ? 'Warning zone' : 'Safe');
-                
-                gaugeContainer.innerHTML = '<div class="ltv-gauge">' +
-                    '<div class="ltv-fill ' + statusClass + '" style="width:' + ltvClamped + '%">' +
-                    '<span class="ltv-label">' + ltv.toFixed(1) + '% — ' + statusText + '</span>' +
-                    '</div>' +
-                    '<div class="ltv-marker warning" title="70% Warning"></div>' +
-                    '<div class="ltv-marker danger" title="80% Liquidation"></div>' +
-                    '</div>';
-            } else if (loan.btc > 0) {
-                // If btcPrice is 0, show the BTC amount at least
-                document.getElementById('loanBtcDisplayStats').innerHTML = '₿ ' + loan.btc.toFixed(4);
-                document.getElementById('loanCollateralValueStats').textContent = 'Loading...';
-                document.getElementById('loanAmountStats').textContent = '-' + sm + (loan.amount * rt).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-            } else {
-                document.getElementById('ltvGaugeContainer').innerHTML = '<div style="text-align:center;color:var(--ts);padding:20px">No loan active</div>';
-            }
+            updateStats(); // This will render loan values + LTV gauge
         }, 100);
     }
 }
