@@ -107,7 +107,7 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 </style>
 </head>
 <body>
-<div class="hdr"><div><h1>StackSats</h1><span id="cdate"></span></div><div style="display:flex;align-items:center;gap:8px"><button onclick="exportData()" style="background:none;border:none;color:var(--ts);font-size:12px;cursor:pointer">💾</button><input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(this.files[0])"><button onclick="document.getElementById('importFile').click()" style="background:none;border:none;color:var(--ts);font-size:12px;cursor:pointer">📂</button><span style="cursor:pointer" onclick="fetchBTCPrice()" title="Click to refresh">₿ <span id="btcPrice">...</span></span></div></div>
+<div class="hdr"><div><h1>StackSats</h1><span id="cdate"></span></div><div style="display:flex;align-items:center;gap:8px"><button onclick="exportData()" style="background:none;border:none;color:var(--ts);font-size:12px;cursor:pointer">💾</button><input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(this.files[0])"><button onclick="document.getElementById('importFile').click()" style="background:none;border:none;color:var(--ts);font-size:12px;cursor:pointer">📂</button><span style="cursor:pointer" onclick="fetchBTCPrice()" title="Click to refresh">₿ <span id="btcPrice">Loading...</span></span></div></div>
 <div class="cnt" id="financeView">
 <div class="nwc"><div class="nwl">Net Worth</div><div class="nwa" id="totalNetWorth" onclick="toggleCurrency()">$0</div><div id="btcDailyChange"></div></div>
 <div class="st">Assets</div>
@@ -280,8 +280,12 @@ function fetchBTCPrice() {
             if (cached.price) {
                 btcPrice = cached.price;
                 document.getElementById('btcPrice').textContent = '$' + btcPrice.toLocaleString() + ' (cached)';
-                loadData();
+            } else {
+                // Default fallback - show reasonable BTC price
+                btcPrice = 69500;
+                document.getElementById('btcPrice').textContent = '$' + btcPrice.toLocaleString() + ' (~)';
             }
+            loadData();
             return;
         }
         
