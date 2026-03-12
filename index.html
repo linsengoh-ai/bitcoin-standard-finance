@@ -109,7 +109,7 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 <body>
 <div class="hdr"><div><h1>StackSats</h1><span id="cdate"></span></div><div style="display:flex;align-items:center;gap:8px"><button onclick="exportData()" style="background:none;border:none;color:var(--ts);font-size:12px;cursor:pointer">💾</button><input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(this.files[0])"><button onclick="document.getElementById('importFile').click()" style="background:none;border:none;color:var(--ts);font-size:12px;cursor:pointer">📂</button><span style="cursor:pointer" onclick="fetchBTCPrice()" title="Click to refresh">₿ <span id="btcPrice">Loading...</span></span></div></div>
 <div class="cnt" id="financeView">
-<div class="nwc"><div class="nwl">Net Worth</div><div class="nwa" id="totalNetWorth" onclick="toggleCurrency()">$0</div><div id="btcDailyChange"></div></div>
+<div class="nwc"><div class="nwl">Net Worth <span id="currencyLabel">(sats)</span></div><div class="nwa" id="totalNetWorth" onclick="toggleCurrency()">0 sats</div><div id="btcDailyChange"></div></div>
 <div class="st">Assets</div>
 <div class="ri" onclick="openBTCModal()"><div><span>🔐</span><span class="lbl">Ledger</span></div><div style="text-align:right"><div class="val" id="ledgerBtcDisplay">₿ 0.00</div><div class="sub" id="ledgerValueDisplay">BND 0</div></div></div>
 <div class="ri" onclick="openLoanModal()"><div><span>⛓️</span><span class="lbl">Ledn Collateral</span></div><div style="text-align:right"><div class="val" id="loanBtcDisplay">₿ 0.00</div><div class="sub" id="ltvQuickDisplay">LTV 0%</div></div></div>
@@ -221,8 +221,8 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 <script>
 var btcPrice = 0;
 var toUsdRate = 1.34;
-var exchangeRate = {USD: 1/toUsdRate, BND: 1};
-var currency = localStorage.getItem('currency') || 'BND';
+var exchangeRate = {USD: 1/toUsdRate, BND: 1, SATS: 100000000};
+var currency = localStorage.getItem('currency') || 'SATS';
 var currentType = 'expense';
 var netWorthChart = null;
 var categoryChart = null;
@@ -239,6 +239,13 @@ function init() {
         btcPrice = cached.price;
         document.getElementById('btcPrice').textContent = '$' + btcPrice.toLocaleString();
     }
+    
+    // Set currency label on init
+    var label = document.getElementById('currencyLabel');
+    if (label) {
+        label.textContent = currency === 'SATS' ? '(sats)' : (currency === 'USD' ? '(USD)' : '(BND)');
+    }
+    
     loadData();
     fetchExchangeRate();
     fetchBTCPrice();
@@ -343,51 +350,64 @@ function loadData() {
     // Calculate running balances
     var cash = initialCash - cashExpenses + cashIncome;
     var bank = initialBank - bankExpenses + bankIncome;
-    var rt = exchangeRate[currency];
-    var sm = currency === 'USD' ? '$' : 'BND ';
+    var rt = exchangeRate[currency] || 1;
+    var sm = currency === 'USD' ? '$' : (currency === 'SATS' ? 'sats ' : 'BND ');
+    var isSats = currency === 'SATS';
     
-    var lv = btc * btcPrice * toUsdRate * rt;
+    var lv = btc * btcPrice * toUsdRate * (isSats ? 1 : rt);
+    var lvDisplay = isSats ? (lv * 100000000).toLocaleString() : lv.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
     document.getElementById('ledgerBtcDisplay').innerHTML = '₿ ' + btc.toFixed(4);
-    document.getElementById('ledgerValueDisplay').textContent = sm + lv.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    document.getElementById('ledgerValueDisplay').textContent = isSats ? lvDisplay + ' sats' : sm + lvDisplay;
     
     if (loan.btc > 0) {
-        var cv = loan.btc * btcPrice * toUsdRate * rt;
+        var cv = loan.btc * btcPrice * toUsdRate;
+        var cvDisplay = isSats ? (cv * 100000000).toLocaleString() + ' sats' : (cv * rt).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
         var ltv = cv > 0 ? (loan.amount / cv) * 100 : 0;
         document.getElementById('loanBtcDisplay').innerHTML = '₿ ' + loan.btc.toFixed(4);
         document.getElementById('ltvQuickDisplay').textContent = 'LTV ' + ltv.toFixed(0) + '%';
+        // Also update the value display for Ledn
+        var lednValEl = document.getElementById('ledgerValueDisplay');
+        if (lednValEl) lednValEl.textContent = cvDisplay;
     } else {
         document.getElementById('loanBtcDisplay').innerHTML = '₿ 0.00';
         document.getElementById('ltvQuickDisplay').textContent = 'LTV 0%';
     }
     
-    document.getElementById('loanQuickDisplay').textContent = '-' + sm + (loan.amount || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-    document.getElementById('cashDisplay').textContent = sm + (cash * rt).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-    document.getElementById('bankDisplay').textContent = sm + (bank * rt).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-    
     var la = loan.amount || 0;
     var tBtc = btc + (loan.btc || 0);
-    var bV = tBtc * btcPrice * toUsdRate * rt;
-    var nw = cash * rt + bank * rt + bV - la;
+    var btcValue = tBtc * btcPrice * toUsdRate;
     
-    document.getElementById('totalNetWorth').textContent = sm + nw.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    // Handle SATS display mode
+    var nwInFiat = cash + bank + btcValue - la;
+    var nwDisplay = isSats ? (nwInFiat * 100000000).toLocaleString() + ' sats' : sm + nwInFiat.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    document.getElementById('totalNetWorth').textContent = nwDisplay;
+    
+    // Also update loan/cash/bank displays
+    var loanDisplay = isSats ? '-' + (loan.amount * 100000000).toLocaleString() + ' sats' : '-' + sm + (loan.amount || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    document.getElementById('loanQuickDisplay').textContent = loanDisplay;
+    document.getElementById('cashDisplay').textContent = isSats ? (cash * 100000000).toLocaleString() + ' sats' : sm + cash.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    document.getElementById('bankDisplay').textContent = isSats ? (bank * 100000000).toLocaleString() + ' sats' : sm + bank.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
     
     var now = new Date();
     var mtx = txs.filter(function(x) { return new Date(x.date) >= new Date(now.getFullYear(), now.getMonth(), 1); });
-    var inc = mtx.filter(function(x) { return x.type === 'income'; }).reduce(function(s, x) { return s + x.amount; }, 0) * rt;
-    var exp = mtx.filter(function(x) { return x.type === 'expense'; }).reduce(function(s, x) { return s + x.amount; }, 0) * rt;
+    var inc = mtx.filter(function(x) { return x.type === 'income'; }).reduce(function(s, x) { return s + x.amount; }, 0);
+    var exp = mtx.filter(function(x) { return x.type === 'expense'; }).reduce(function(s, x) { return s + x.amount; }, 0);
+    var incDisplay = isSats ? (inc * 100000000).toLocaleString() + ' sats' : sm + (inc * rt).toFixed(0);
+    var expDisplay = isSats ? (exp * 100000000).toLocaleString() + ' sats' : sm + (exp * rt).toFixed(0);
     var ne = inc - exp;
+    var neDisplay = isSats ? (ne * 100000000).toLocaleString() + ' sats' : (ne >= 0 ? '+' : '') + sm + (ne * rt).toFixed(0);
     
-    document.getElementById('monthlyIncome').textContent = sm + inc.toFixed(0);
-    document.getElementById('monthlyExpenses').textContent = sm + exp.toFixed(0);
-    document.getElementById('monthlyNet').textContent = (ne >= 0 ? '+' : '') + sm + ne.toFixed(0);
+    document.getElementById('monthlyIncome').textContent = incDisplay;
+    document.getElementById('monthlyExpenses').textContent = expDisplay;
+    document.getElementById('monthlyNet').textContent = neDisplay;
     document.getElementById('monthlyNet').className = 'sv ' + (ne >= 0 ? 'g' : 'r');
     
-    var btcPct = nw > 0 ? (bV / nw) * 100 : 0;
+    var btcPct = nwInFiat > 0 ? (btcValue / nwInFiat) * 100 : 0;
     document.getElementById('btcPercentDisplay').textContent = btcPct.toFixed(1) + '%';
     
-    var fiat = cash * rt;
-    var tot = bV + fiat;
-    var btcRat = tot > 0 ? (bV / tot) * 100 : 0;
+    var fiat = cash;
+    var tot = btcValue + fiat;
+    var btcRat = tot > 0 ? (btcValue / tot) * 100 : 0;
     document.getElementById('btcFiatRatioDisplay').textContent = btcRat.toFixed(1) + '%';
     
     // Sats saved
@@ -428,6 +448,11 @@ function renderTxs(txs) {
         return;
     }
     
+    // Get currency settings
+    var rt = exchangeRate[currency] || 1;
+    var sm = currency === 'USD' ? '$' : (currency === 'SATS' ? '' : 'BND ');
+    var isSats = currency === 'SATS';
+    
     // Sort by date descending
     var sorted = txs.slice().sort(function(a, b) { return new Date(b.date) - new Date(a.date); }).slice(0, 20);
     
@@ -445,7 +470,9 @@ function renderTxs(txs) {
         
         var idx = txs.length - 1 - sorted.length + i + 1;
         var sourceLabel = x.source === 'bank' ? '<span style="color:var(--ts);font-size:10px;margin-left:6px">bank</span>' : (x.source === 'cash' ? '<span style="color:var(--ts);font-size:10px;margin-left:6px">cash</span>' : '');
-        html += '<div class="tx" data-idx="' + idx + '" ontouchstart="touchStart(event, this)" ontouchend="touchEnd(event, this)" ontouchmove="touchMove(event, this)"><div class="txic" style="background:' + (x.type === 'income' ? 'rgba(48,209,88,0.15)' : 'rgba(255,69,58,0.15)') + '">' + ci[x.category] + '</div><div class="txd"><div class="txdn">' + (x.desc || cn[x.category]) + sourceLabel + '</div><div class="txm">' + txDate + '</div></div><div class="txa ' + (x.type === 'income' ? 'p' : 'n') + '">' + (x.type === 'income' ? '+' : '-') + '$' + x.amount.toFixed(2) + '</div><div class="tx-actions"><button onclick="editTx(' + idx + ')">Edit</button><button onclick="deleteTx(' + idx + ')" style="background:var(--red)">Delete</button></div></div>';
+        var amt = x.amount * rt;
+        var amtDisplay = isSats ? Math.round(amt * 100000000).toLocaleString() + ' sats' : sm + amt.toFixed(2);
+        html += '<div class="tx" data-idx="' + idx + '" ontouchstart="touchStart(event, this)" ontouchend="touchEnd(event, this)" ontouchmove="touchMove(event, this)"><div class="txic" style="background:' + (x.type === 'income' ? 'rgba(48,209,88,0.15)' : 'rgba(255,69,58,0.15)') + '">' + ci[x.category] + '</div><div class="txd"><div class="txdn">' + (x.desc || cn[x.category]) + sourceLabel + '</div><div class="txm">' + txDate + '</div></div><div class="txa ' + (x.type === 'income' ? 'p' : 'n') + '">' + (x.type === 'income' ? '+' : '-') + amtDisplay + '</div><div class="tx-actions"><button onclick="editTx(' + idx + ')">Edit</button><button onclick="deleteTx(' + idx + ')" style="background:var(--red)">Delete</button></div></div>';
     });
     
     l.innerHTML = html;
@@ -500,19 +527,26 @@ var currentTxIndex = -1;
 function updateStats() {
     var btc = parseFloat(localStorage.getItem('btcHoldings') || '0');
     var loan = JSON.parse(localStorage.getItem('loan') || '{"amount":0,"btc":0}');
-    var rt = exchangeRate[currency];
-    var sm = currency === 'USD' ? '$' : 'BND ';
+    var rt = exchangeRate[currency] || 1;
+    var sm = currency === 'USD' ? '$' : (currency === 'SATS' ? 'sats ' : 'BND ');
+    var isSats = currency === 'SATS';
     var txs = JSON.parse(localStorage.getItem('transactions') || '[]');
     var now = new Date();
     var mtx = txs.filter(function(x) { return new Date(x.date) >= new Date(now.getFullYear(), now.getMonth(), 1); });
-    var inc = mtx.filter(function(x) { return x.type === 'income'; }).reduce(function(s, x) { return s + x.amount; }, 0) * rt;
-    var exp = mtx.filter(function(x) { return x.type === 'expense'; }).reduce(function(s, x) { return s + x.amount; }, 0) * rt;
+    var inc = mtx.filter(function(x) { return x.type === 'income'; }).reduce(function(s, x) { return s + x.amount; }, 0);
+    var exp = mtx.filter(function(x) { return x.type === 'expense'; }).reduce(function(s, x) { return s + x.amount; }, 0);
     
+    var btcValue = btc * btcPrice * toUsdRate;
     document.getElementById('btcDisplay').textContent = btc.toFixed(8) + ' BTC';
-    document.getElementById('btcValueDisplay').textContent = sm + (btc * btcPrice * toUsdRate * rt).toLocaleString();
-    document.getElementById('statsIncome').textContent = sm + inc.toFixed(0);
-    document.getElementById('statsExpenses').textContent = sm + exp.toFixed(0);
-    document.getElementById('statsNet').textContent = (inc >= exp ? '+' : '') + sm + (inc - exp).toFixed(0);
+    var btcValueDisplay = isSats ? (btcValue * 100000000).toLocaleString() + ' sats' : sm + btcValue.toLocaleString();
+    document.getElementById('btcValueDisplay').textContent = btcValueDisplay;
+    var incDisplay = isSats ? (inc * 100000000).toLocaleString() + ' sats' : sm + (inc * rt).toFixed(0);
+    var expDisplay = isSats ? (exp * 100000000).toLocaleString() + ' sats' : sm + (exp * rt).toFixed(0);
+    var net = inc - exp;
+    var netDisplay = isSats ? (net * 100000000).toLocaleString() + ' sats' : (net >= 0 ? '+' : '') + sm + (net * rt).toFixed(0);
+    document.getElementById('statsIncome').textContent = incDisplay;
+    document.getElementById('statsExpenses').textContent = expDisplay;
+    document.getElementById('statsNet').textContent = netDisplay;
     
     // Last month stats
     var lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
@@ -569,8 +603,18 @@ function updateStats() {
 }
 
 function toggleCurrency() {
-    currency = currency === 'USD' ? 'BND' : 'USD';
+    // Cycle: SATS -> USD -> BND -> SATS
+    if (currency === 'SATS') currency = 'USD';
+    else if (currency === 'USD') currency = 'BND';
+    else currency = 'SATS';
     localStorage.setItem('currency', currency);
+    
+    // Update currency label
+    var label = document.getElementById('currencyLabel');
+    if (label) {
+        label.textContent = currency === 'SATS' ? '(sats)' : (currency === 'USD' ? '(USD)' : '(BND)');
+    }
+    
     loadData();
 }
 
@@ -781,14 +825,17 @@ function openBtcStandardModal() {
     var btc = parseFloat(localStorage.getItem('btcHoldings') || '0');
     var loan = JSON.parse(localStorage.getItem('loan') || '{"amount":0,"btc":0}');
     var cash = parseFloat(localStorage.getItem('cash') || '0');
-    var rt = exchangeRate[currency];
-    var sm = currency === 'USD' ? '$' : 'BND ';
-    var fh = cash * rt;
-    document.getElementById('fiatHoldingsDisplay').textContent = sm + fh.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    var rt = exchangeRate[currency] || 1;
+    var sm = currency === 'USD' ? '$' : (currency === 'SATS' ? '' : 'BND ');
+    var isSats = currency === 'SATS';
+    var fh = cash * (isSats ? 1 : rt);
+    var fhDisplay = isSats ? (fh * 100000000).toLocaleString() + ' sats' : sm + fh.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    document.getElementById('fiatHoldingsDisplay').textContent = fhDisplay;
     var totalBtc = btc + (loan.btc || 0);
-    var bV = totalBtc * btcPrice * toUsdRate * rt;
+    var bV = totalBtc * btcPrice * toUsdRate;
+    var bVDisplay = isSats ? (bV * 100000000).toLocaleString() + ' sats' : sm + (bV * rt).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
     document.getElementById('btcHoldingsDisplay').innerHTML = '₿ ' + btc.toFixed(4) + ' <span style="font-size:14px;color:var(--ts)">+ ₿ ' + (loan.btc || 0).toFixed(4) + '</span>';
-    document.getElementById('btcHoldingsValueDisplay').textContent = sm + bV.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    document.getElementById('btcHoldingsValueDisplay').textContent = bVDisplay;
     document.getElementById('costBasisInput').value = localStorage.getItem('costBasis') || '';
     document.getElementById('btcStandardModal').style.display = 'flex';
 }
