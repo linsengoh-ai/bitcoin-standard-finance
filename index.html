@@ -275,6 +275,7 @@ function fetchExchangeRate() {
 function fetchBTCPrice() {
     // Use multiple sources for reliability
     var sources = [
+        {url: 'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd', parser: function(d) { return d && d.bitcoin && d.bitcoin.usd ? d.bitcoin.usd : null; }},
         {url: 'https://api.coinbase.com/v2/prices/BTC-USD/spot', parser: function(d) { return d && d.data && d.data.amount ? parseFloat(d.data.amount) : null; }},
         {url: 'https://api.binance.com/api/v3/ticker/24hr?symbol=BTCUSDT', parser: function(d) { return d && d.lastPrice ? parseFloat(d.lastPrice) : null; }},
         {url: 'https://api.kraken.com/0/public/Ticker?pair=XBTUSD', parser: function(d) { return d && d.result && d.result.XXBTZUSD && d.result.XXBTZUSD.c ? parseFloat(d.result.XXBTZUSD.c[0]) : null; }}
